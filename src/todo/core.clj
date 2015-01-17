@@ -4,3 +4,5 @@
   (let [todo {:task task}]
     (save-fn! todo)))
 
+(defn update-todo [save-fn! todo]
+  (save-fn! todo)) 
