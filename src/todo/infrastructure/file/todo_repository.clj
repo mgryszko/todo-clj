@@ -13,18 +13,17 @@
     (count (line-seq r))))
 
 (defn read-all-lines []
-  (with-open [rdr (io/reader file-name)]
-    (into [] (line-seq rdr))))
+  (if (file-exists)
+    (with-open [rdr (io/reader file-name)]
+      (into [] (line-seq rdr)))
+    []))
+
+(defn next-id []
+  (+ (if (file-exists) (count-lines) 0) 1))
 
 (defn modify-nth-line [lines todo]
   (let [line-number (:id todo)] 
      (assoc lines (- line-number 1) (:task todo))))
-
-(defn last-id []
-  (if (file-exists) (count-lines) 0))
-
-(defn save-todo! [todo] 
-  (spit "todo.txt" (str (:task todo) line-separator) :append true) (conj todo {:id (last-id)}))
 
 (defn update-todo! [todo]
   (let [line-number (:id todo)
@@ -34,3 +33,7 @@
          (.write w line)
          (.newLine w))))
   todo)
+
+(defn save-todo! [todo] 
+  (update-todo! (assoc todo :id (next-id))))
+
