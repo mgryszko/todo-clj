@@ -34,6 +34,6 @@
          (.newLine w))))
   todo)
 
-(defn save-todo! [todo] 
+(defn add-todo! [todo] 
   (update-todo! (assoc todo :id (next-id))))
 

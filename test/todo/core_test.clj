@@ -3,7 +3,6 @@
             [todo.core :refer :all]))
 
 (declare save-todo!)
-(declare update-todo!)
 
 (facts "todo use cases"
   (let [any-new-task {:task "any task"}
@@ -15,7 +14,7 @@
           (save-todo! any-new-task) => any-persistent-todo :times 1))
 
      (fact "todo is updated"
-      (update-todo update-todo! any-persistent-todo) => any-persistent-todo
+      (update-todo save-todo! any-persistent-todo) => any-persistent-todo
         (provided
-          (update-todo! any-persistent-todo) => any-persistent-todo :times 1))))
+          (save-todo! any-persistent-todo) => any-persistent-todo :times 1))))
 

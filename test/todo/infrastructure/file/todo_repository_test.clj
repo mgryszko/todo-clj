@@ -18,20 +18,20 @@
             (after :facts (delete-todo-file)))
 
 (facts "todo file repository"
-  (fact "saves single todo"
-    (save-todo! {:task "any"}) =>
+  (fact "adds single todo"
+    (add-todo! {:task "any"}) =>
       (every-checker (file-saved ["any"])
                      {:id 1 :task "any"}))
 
-  (fact "saves two todos"
-    (save-todo! {:task "first"})
-    (save-todo! {:task "second"}) =>
+  (fact "adds two todos"
+    (add-todo! {:task "first"})
+    (add-todo! {:task "second"}) =>
       (every-checker (file-saved ["first", "second"])
                                  {:id 2 :task "second"}))
   (against-background 
-    [(before :facts ((save-todo! {:task "first"})
-                     (save-todo! {:task "second"})
-                     (save-todo! {:task "third"})))]
+    [(before :facts ((add-todo! {:task "first"})
+                     (add-todo! {:task "second"})
+                     (add-todo! {:task "third"})))]
       
     (fact "updates first todo"
       (let [todo {:id 1 :task "updated"}]
