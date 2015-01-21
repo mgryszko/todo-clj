@@ -2,17 +2,9 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [midje.sweet :refer :all]
-            [todo.infrastructure.file.todo-repository :refer :all]))
-
-(defn delete-todo-file []
-    (io/delete-file "todo.txt" true))
-
-(defn get-lines [file]
-  (str/split-lines (slurp file)))
-
-(defchecker file-saved [expected-todos]
-    (chatty-checker [_]
-                    (= (get-lines "todo.txt") expected-todos)))
+            [todo.infrastructure.file.checkers :refer :all]
+            [todo.infrastructure.file.todo-repository :refer :all]
+            [todo.infrastructure.file.test-operations :refer :all]))
 
 (background (before :facts (delete-todo-file))
             (after :facts (delete-todo-file)))
