@@ -15,4 +15,7 @@
     (-main "add" "second") => (file-saved ["first", "second"]) 
     (-main "add" "third") => (file-saved ["first", "second", "third"]) 
     (-main "update" 1 "first updated") => (file-saved ["first updated", "second", "third"]) 
-    (-main "update" 3 "third updated") => (file-saved ["first updated", "second", "third updated"])))
+    (-main "update" 3 "third updated") => (file-saved ["first updated", "second", "third updated"]))
+  
+  (fact "prints usage on unknown action"
+    (with-out-str (-main "unkown")) => (has-prefix #"\s+Usage")))
