@@ -1,16 +1,16 @@
 (ns todo.app.main
   (require [clojure.string :refer [join]]
-           [todo.core :refer [create-todo update-todo]]
-           [todo.infrastructure.file.repository :refer [add-todo! update-todo!]])
+           [todo.core :as core :refer [add-todo update-todo]]
+           [todo.infrastructure.file.repository :as repo :refer [add-todo! update-todo!]])
   (:gen-class))
 
 (defn as-complete-task [task-parts] (join " " task-parts))
 
 (defn add [task-parts]
-  (create-todo add-todo! (as-complete-task task-parts)))
+  (core/add-todo repo/add-todo! (as-complete-task task-parts)))
 
 (defn update [[id & task-parts]]
-  (update-todo update-todo! {:id id :task (as-complete-task task-parts)}))
+  (core/update-todo repo/update-todo! {:id id :task (as-complete-task task-parts)}))
 
 (defn no-idea [_]
   (println "no idea what to do"))

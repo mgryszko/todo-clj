@@ -9,7 +9,7 @@
         any-persistent-todo (conj {:id 1} any-new-task)] 
 
     (fact "todo is created"
-      (create-todo save-todo! "any task") => any-persistent-todo
+      (add-todo save-todo! "any task") => any-persistent-todo
         (provided
           (save-todo! any-new-task) => any-persistent-todo :times 1))
 
