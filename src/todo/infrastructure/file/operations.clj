@@ -2,14 +2,16 @@
   (:require [clojure.java.io :refer [as-file reader writer]])
   (:import [java.nio.file Paths Files CopyOption StandardCopyOption]))
 
-(defn file-exists [f] (.exists (as-file f)))
+(defn file-exists? [f] (.exists (as-file f)))
 
 (defn count-lines [f]
-  (with-open [r (reader f)]
-    (count (line-seq r))))
+  (if (file-exists? f)
+    (with-open [r (reader f)]
+      (count (line-seq r)))
+    0))
 
 (defn read-lines [f]
-  (if (file-exists f)
+  (if (file-exists? f)
     (with-open [r (reader f)]
       (into [] (line-seq r)))
     []))

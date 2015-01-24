@@ -16,6 +16,13 @@
     (-main "add" "third") => (file-saved ["first", "second", "third"]) 
     (-main "update" 1 "first updated") => (file-saved ["first updated", "second", "third"]) 
     (-main "update" 3 "third updated") => (file-saved ["first updated", "second", "third updated"]))
+
+  (fact "new or updated todo without task is rejected"
+    (let [expected-message #"Empty task!"]
+      (with-out-str (-main "add")) => (every-checker expected-message file-not-created)
+      (with-out-str (-main "add" " \t\n ")) => (every-checker expected-message file-not-created)
+      (with-out-str (-main "update" 1)) => (every-checker expected-message file-not-created)
+      (with-out-str (-main "update" 1 " \t\n ")) => (every-checker expected-message file-not-created)))
   
   (fact "prints usage on unknown action"
-    (with-out-str (-main "unkown")) => (has-prefix #"\s+Usage")))
+    (with-out-str (-main "unkown")) => #"\s+Usage"))

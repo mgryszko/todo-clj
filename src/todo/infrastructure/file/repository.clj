@@ -5,7 +5,7 @@
 (def file-name "todo.txt")
 
 (defn next-id []
-  (+ (if (file-exists file-name) (count-lines file-name) 0) 1))
+  (+ (count-lines file-name) 1))
 
 (defn modify-nth-line [lines todo]
   (let [line-number (:id todo)] 
