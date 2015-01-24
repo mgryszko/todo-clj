@@ -1,7 +1,7 @@
 (ns todo.app.main
   (require [clojure.string :refer [join]]
            [todo.core :refer [create-todo update-todo]]
-           [todo.infrastructure.file.todo-repository :refer [add-todo! update-todo!]])
+           [todo.infrastructure.file.repository :refer [add-todo! update-todo!]])
   (:gen-class))
 
 (defn as-complete-task [task-parts] (join " " task-parts))

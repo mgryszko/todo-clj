@@ -1,9 +1,9 @@
-(ns todo.infrastructure.file.todo-repository-test
+(ns todo.infrastructure.file.repository-test
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [midje.sweet :refer :all]
             [todo.infrastructure.file.checkers :refer :all]
-            [todo.infrastructure.file.todo-repository :refer :all]
+            [todo.infrastructure.file.repository :refer :all]
             [todo.infrastructure.file.test-operations :refer :all]))
 
 (background (before :facts (delete-todo-file))

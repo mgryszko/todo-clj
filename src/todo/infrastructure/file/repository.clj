@@ -1,4 +1,4 @@
-(ns todo.infrastructure.file.todo-repository
+(ns todo.infrastructure.file.repository
   (:require [todo.infrastructure.file.operations :refer :all])
   (:import [java.io File]))
 
