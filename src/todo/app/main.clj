@@ -1,23 +1,36 @@
 (ns todo.app.main
   (require [clojure.string :refer [join blank?]]
-           [todo.core :as core :refer [add-todo update-todo]]
+           [todo.core :as core :refer [can-todo-be-added? add-todo update-todo]]
+           [todo.infrastructure.file.operations :as ops :refer [count-lines]]
            [todo.infrastructure.file.repository :as repo :refer [add-todo! update-todo!]])
   (:gen-class))
 
-(defn as-complete-task [task-parts] (join " " task-parts))
+(def messages {:task_empty "Empty task!"})
+
+(defn print-message [key] (println (key messages)))
+
+(defmacro proceed-if [validate-fn on-success]
+  `(let [validation-result# ~validate-fn]
+     (if (= validation-result# :ok)
+       ~on-success
+       (print-message validation-result#))))
+
 (defn as-task [task-parts] (join " " task-parts))
 
 (defn add [task-parts]
   (let [task (as-task task-parts)]
-    (if (blank? task) 
-      (println "Empty task!")
+    (proceed-if (can-todo-be-added? task)
       (core/add-todo repo/add-todo! task))))
 
 (defn update [[id & task-parts]]
   (let [task (as-task task-parts)]
-    (if (blank? task)
-      (println "Empty task!")
-      (core/update-todo repo/update-todo! {:id id :task task}))))
+    (cond 
+      (blank? task)
+        (println "Empty task!")
+      (or (> id (ops/count-lines "todo.txt")) (< id 1))
+        (println (str "No task with number " id "!"))
+      :else
+        (core/update-todo repo/update-todo! {:id id :task task}))))
 
 (def usage "
   Usage: todo action [task_number] [task_description]
