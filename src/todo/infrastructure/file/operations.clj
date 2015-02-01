@@ -1,6 +1,6 @@
 (ns todo.infrastructure.file.operations
   (:require [clojure.java.io :refer [as-file reader writer]])
-  (:import [java.nio.file Paths Files CopyOption StandardCopyOption]))
+  (:import [java.nio.file Files CopyOption StandardCopyOption]))
 
 (defn file-exists? [f] (.exists (as-file f)))
 

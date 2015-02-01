@@ -17,16 +17,19 @@
     (-main "update" 1 "first updated") => (file-saved ["first updated", "second", "third"]) 
     (-main "update" 3 "third updated") => (file-saved ["first updated", "second", "third updated"]))
 
-  (fact "new or updated todo without task is rejected"
+  (fact "new todo without task is rejected"
     (let [expected-message #"Empty task!"]
       (with-out-str (-main "add")) => (every-checker expected-message file-not-created)
-      (with-out-str (-main "add" "")) => (every-checker expected-message file-not-created)
-      (with-out-str (-main "update" 1)) => (every-checker expected-message file-not-created)
-      (with-out-str (-main "update" 1 " \t\n ")) => (every-checker expected-message file-not-created)))
+      (with-out-str (-main "add" "")) => (every-checker expected-message file-not-created)))
 
-  (fact "updated todo with nonexisting task number is rejected"
-    (let [expected-message #"No task with number 1!"]
-      (with-out-str (-main "update" 1 "task")) => (every-checker expected-message file-not-created)))
-  
+  (against-background [(before :facts (-main "add" "first"))]
+    (fact "updated todo with nonexisting task number is rejected"
+      (let [expected-message #"No task with number 2!"]
+        (with-out-str (-main "update" 2)) => expected-message))
+
+    (fact "updated todo without task is rejected"
+      (let [expected-message #"Empty task!"]
+        (with-out-str (-main "update" 1 " \t\n ")) => expected-message)))
+
   (fact "prints usage on unknown action"
     (with-out-str (-main "unkown")) => #"\s+Usage"))
