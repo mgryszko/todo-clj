@@ -24,3 +24,8 @@
 (defn id-exists? [id]
   (and (>= id 1) (<= id (count-lines file-name))))
 
+(defn find-all []
+  (let [lines (read-lines file-name)
+        ids (iterate inc 1)]
+    (->> (map vector ids lines)
+         (map #(hash-map :id (first %) :task (second %))))))

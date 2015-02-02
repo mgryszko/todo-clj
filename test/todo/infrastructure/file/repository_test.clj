@@ -35,4 +35,7 @@
       (let [todo {:id 3 :task "updated"}]
         (update-todo! todo) =>
           (every-checker (file-saved ["first" "second" "updated"])
-                         {:id 3 :task "updated"})))))
+                         {:id 3 :task "updated"})))
+
+    (fact "finds all todos"
+      (find-all) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))

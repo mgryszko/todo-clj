@@ -23,3 +23,5 @@
 (defn update-todo [id-exists-fn save-fn! todo]
   (proceed-if (can-todo-be-updated? id-exists-fn todo))
   (save-fn! todo))
+
+(defn find-all-todos [find-all-fn] (find-all-fn))

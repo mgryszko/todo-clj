@@ -4,6 +4,7 @@
 
 (declare save-todo!)
 (declare id-exists?)
+(declare find-all)
 
 (facts "about todo use cases"
   (let [any-task "any task"
@@ -48,5 +49,11 @@
         (against-background (id-exists? (any-persistent-todo :id)) => true)
         (update-todo id-exists? save-todo! any-persistent-todo) => any-persistent-todo
           (provided
-            (save-todo! any-persistent-todo) => any-persistent-todo :times 1)))))
+            (save-todo! any-persistent-todo) => any-persistent-todo :times 1)))
+
+    (facts "about finding all todos"
+      (fact "all todos are listed"
+        (find-all-todos find-all) => [any-persistent-todo]
+          (provided (find-all) => [any-persistent-todo])))))
+
 

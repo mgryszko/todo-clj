@@ -31,5 +31,11 @@
       (let [expected-message #"Empty task!"]
         (with-out-str (-main "update" 1 " \t\n ")) => expected-message)))
 
+  (against-background [(before :facts ((-main "add" "first")
+                                       (-main "add" "second")
+                                       (-main "add" "third")))]
+    (fact "lists todos"
+      (with-out-str (-main "list")) => "1 first\n2 second\n3 third\n"))
+
   (fact "prints usage on unknown action"
     (with-out-str (-main "unkown")) => #"\s+Usage"))
