@@ -5,7 +5,8 @@
    :id_not_found "No task with number %s!"})
 
 (defn print-message [key & args]
-  (println (apply format (into [(key messages)] args))))
+  (->> (apply format (into [(key messages)] args))
+       (println)))
 
 (defmacro proceed-if [validate-fn on-success]
   `(let [validation-result# ~validate-fn]

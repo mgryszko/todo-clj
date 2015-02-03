@@ -10,7 +10,7 @@
 
 (defn update-todo! [todo]
   (let [lines (modify-nth-line (read-lines file-name) todo)
-        temp-file (File/createTempFile "todo" nil)] 
+        temp-file (File/createTempFile "todo" nil)]
     (write-lines temp-file lines)
     (atomic-move temp-file file-name))
   todo)
@@ -19,7 +19,8 @@
   (+ (count-lines file-name) 1))
 
 (defn add-todo! [todo]
-  (update-todo! (assoc todo :id (next-id))))
+  (->> (assoc todo :id (next-id))
+       (update-todo!)))
 
 (defn id-exists? [id]
   (and (>= id 1) (<= id (count-lines file-name))))

@@ -22,9 +22,10 @@
   (str id " " task))
 
 (defn- find-all [_]
-  (let [todos (core/find-all-todos repo/find-all)]
-   (println (join "\n" (map format-todo todos)))
-  ))
+  (->> (core/find-all-todos repo/find-all)
+       (map format-todo)
+       (join "\n")
+       (println)))
 
 (defn- print-usage [_]
   (println "

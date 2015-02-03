@@ -9,6 +9,10 @@
 (background (before :facts (delete-todo-file))
             (after :facts (delete-todo-file)))
 
+(defmacro with-trimmed-out-str [body]
+
+  )
+
 (facts "todo application"
   (fact "adds and updates todos"
     (-main "add" "first") => (file-saved ["first"])
