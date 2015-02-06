@@ -45,4 +45,4 @@
       (with-trimmed-out-str (-main "list")) => "1 first\n2 second\n3 third"))
 
   (fact "prints usage on unknown action"
-    (with-out-str (-main "unkown")) => #"\s+Usage"))
+    (with-out-str (-main "unknown")) => #"\s+Usage"))
