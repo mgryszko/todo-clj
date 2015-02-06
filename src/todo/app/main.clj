@@ -22,7 +22,10 @@
   (let [task (as-task task-parts)
         todo {:id id :task task}]
     (val/proceed-if (core/can-todo-be-updated? repo/id-exists? todo)
-      (core/update-todo repo/id-exists? repo/update-todo! todo))))
+      (->> (core/update-todo repo/id-exists? repo/update-todo! todo)
+        (format-todo)
+        (str "Updated: ")
+        (println)))))
 
 (defn- find-all [_]
   (->> (core/find-all-todos repo/find-all)
