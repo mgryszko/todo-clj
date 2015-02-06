@@ -38,4 +38,8 @@
                          {:id 3 :task "updated"})))
 
     (fact "finds all todos"
-      (find-all) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))
+      (find-all) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])
+
+    (fact "finds todo by line number"
+      (find-by-line-number 1) => {:id 1 :task "first"}
+      (find-by-line-number 3) => {:id 3 :task "third"})))

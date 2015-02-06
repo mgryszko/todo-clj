@@ -24,9 +24,9 @@
     (with-main "add" "third") =>
       (every-checker "Added: 3 third" (file-saved ["first" "second" "third"]))
     (with-main "update" 1 "first updated") =>
-      (every-checker "Updated: 1 first updated" (file-saved ["first updated" "second" "third"]))
+      (every-checker "Updated: 1 first\n     to: 1 first updated" (file-saved ["first updated" "second" "third"]))
     (with-main "update" 3 "third updated") =>
-      (every-checker "Updated: 3 third updated" (file-saved ["first updated" "second" "third updated"])))
+      (every-checker "Updated: 3 third\n     to: 3 third updated" (file-saved ["first updated" "second" "third updated"])))
 
   (fact "new todo without task is rejected"
     (let [expected-message "Empty task!"]

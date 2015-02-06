@@ -29,4 +29,9 @@
   (let [lines (read-lines file-name)
         ids (iterate inc 1)]
     (->> (map vector ids lines)
-         (map #(hash-map :id (first %) :task (second %))))))
+         (map #(hash-map :id (first %) :task (second %)))
+         (into []))))
+
+(defn find-by-line-number [line-num]
+  (get (into [] (find-all)) (- line-num 1)))
+
