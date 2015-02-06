@@ -37,6 +37,7 @@
     Actions:
       add \"task to be done\"
       update 1 \"task to be updated\"
+      list
 "))
 
 (defn- command-from-args [args]
