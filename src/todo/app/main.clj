@@ -10,13 +10,16 @@
 (defn- format-todo [{:keys [id task]}]
   (str id " " task))
 
+(defn- print-formatted [text todo]
+  (->> (format-todo todo)
+       (str text)
+       (println)))
+
 (defn- add [task-parts]
   (let [task (as-task task-parts)]
     (val/proceed-if (core/can-todo-be-added? task)
       (->> (core/add-todo repo/add-todo! task)
-           (format-todo)
-           (str "Added: ")
-           (println)))))
+           (print-formatted "Added: ")))))
 
 (defn- update [[id & task-parts]]
   (let [task (as-task task-parts)
@@ -24,15 +27,11 @@
     (val/proceed-if (core/can-todo-be-updated? repo/id-exists? todo)
       (let [old-todo (core/find-todo-by-id repo/find-by-line-number id)]
       (->> (core/update-todo repo/id-exists? repo/update-todo! todo)
-        (format-todo)
-        (str "Updated: " (format-todo old-todo) "\n     to: ")
-        (println))))))
+           (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
 (defn- find-all [_]
-  (->> (core/find-all-todos repo/find-all)
-       (map format-todo)
-       (join "\n")
-       (println)))
+  (let [todos (core/find-all-todos repo/find-all)]
+    (dorun (map #(print-formatted "" %) todos))))
 
 (defn- print-usage [_]
   (println "
