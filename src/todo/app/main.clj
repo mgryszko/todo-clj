@@ -29,6 +29,10 @@
       (->> (core/update-todo repo/id-exists? repo/update-todo! todo)
            (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
+(defn- delete [[id]]
+  (->> (core/delete-todo repo/delete-todo! id)
+       (print-formatted "Deleted: ")))
+
 (defn- find-all [_]
   (let [todos (core/find-all-todos repo/find-all)]
     (dorun (map #(print-formatted "" %) todos))))
@@ -40,6 +44,7 @@
     Actions:
       add \"task to be done\"
       update 1 \"task to be updated\"
+      delete 2
       list
 "))
 
@@ -47,6 +52,7 @@
   (case (first args)
     "add" add
     "update" update
+    "delete" delete 
     "list" find-all
     print-usage))
 

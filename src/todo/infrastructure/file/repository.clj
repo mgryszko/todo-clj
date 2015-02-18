@@ -5,8 +5,8 @@
 (def file-name "todo.txt")
 
 (defn- modify-nth-line [lines todo]
-  (let [line-number (:id todo)] 
-     (assoc lines (- line-number 1) (:task todo))))
+  (let [line-num (:id todo)] 
+     (assoc lines (- line-num 1) (:task todo))))
 
 (defn update-todo! [todo]
   (let [lines (modify-nth-line (read-lines file-name) todo)
@@ -22,6 +22,21 @@
   (->> (assoc todo :id (next-id))
        (update-todo!)))
 
+(defn- delete-nth-line [lines line-num]
+  (into [] (concat
+             (subvec lines 0 (- line-num 1))
+             (subvec lines line-num))))
+
+(defn- make-todo [id line] {:id id :task line})
+
+(defn delete-todo! [id]
+  (let [lines (read-lines file-name)
+        truncated-lines (delete-nth-line lines id)
+        temp-file (File/createTempFile "todo" nil)]
+    (write-lines temp-file truncated-lines)
+    (atomic-move temp-file file-name)
+    (make-todo id (get lines (- id 1)))))
+
 (defn id-exists? [id]
   (and (>= id 1) (<= id (count-lines file-name))))
 
@@ -29,7 +44,7 @@
   (let [lines (read-lines file-name)
         ids (iterate inc 1)]
     (->> (map vector ids lines)
-         (map #(hash-map :id (first %) :task (second %)))
+         (map #(apply make-todo %))
          (into []))))
 
 (defn find-by-line-number [line-num]

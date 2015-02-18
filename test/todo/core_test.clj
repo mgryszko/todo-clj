@@ -2,9 +2,7 @@
   (:require [midje.sweet :refer :all]
             [todo.core :refer :all]))
 
-(declare save-todo!)
-(declare id-exists?)
-(declare find-todo)
+(declare save-todo! delete-todo! id-exists? find-todo)
 
 (facts "about todo use cases"
   (let [any-task "any task"
@@ -50,6 +48,12 @@
         (update-todo id-exists? save-todo! any-persistent-todo) => any-persistent-todo
           (provided
             (save-todo! any-persistent-todo) => any-persistent-todo :times 1)))
+
+    (facts "about deleting todo"
+      (fact "todo is deleted"
+        (delete-todo delete-todo! any-persistent-todo) => any-persistent-todo
+          (provided
+            (delete-todo! any-persistent-todo) => any-persistent-todo :times 1)))
 
     (facts "about finding"
       (fact "all todos"

@@ -41,8 +41,12 @@
       (with-main "update" 1 " \t\n ") => "Empty task!"))
 
   (against-background [(before :facts (add-silently "first" "second" "third"))]
+    (fact "deletes a todo"
+      (with-main "delete" 2) => (file-saved ["first" "third"])))
+
+  (against-background [(before :facts (add-silently "first" "second" "third"))]
     (fact "lists todos"
       (with-main "list") => "1 first\n2 second\n3 third"))
-
+  
   (fact "prints usage on unknown action"
     (with-main "unknown") => #"\s*Usage"))

@@ -9,7 +9,7 @@
 (background (before :facts (delete-todo-file))
             (after :facts (delete-todo-file)))
 
-(facts "todo file repository"
+(facts "about file repository"
   (fact "adds single todo"
     (add-todo! {:task "any"}) =>
       (every-checker (file-saved ["any"])
@@ -20,26 +20,48 @@
     (add-todo! {:task "second"}) =>
       (every-checker (file-saved ["first", "second"])
                                  {:id 2 :task "second"}))
+
   (against-background 
-    [(before :facts ((add-todo! {:task "first"})
+    [(before :facts [(add-todo! {:task "first"})
                      (add-todo! {:task "second"})
-                     (add-todo! {:task "third"})))]
+                     (add-todo! {:task "third"})
+                     (add-todo! {:task "fourth"})])]
       
     (fact "updates first todo"
       (let [todo {:id 1 :task "updated"}]
         (update-todo! todo) =>
-          (every-checker (file-saved ["updated" "second" "third"])
-                         {:id 1 :task "updated"})))
+          (every-checker (file-saved ["updated" "second" "third" "fourth"]) todo)))
 
     (fact "updates last todo"
-      (let [todo {:id 3 :task "updated"}]
+      (let [todo {:id 4 :task "updated"}]
         (update-todo! todo) =>
-          (every-checker (file-saved ["first" "second" "updated"])
-                         {:id 3 :task "updated"})))
+          (every-checker (file-saved ["first" "second" "third" "updated"]) todo)))
+    
+    (fact "deletes first todo"
+      (let [id 1]
+        (delete-todo! id) =>
+          (every-checker (file-saved ["second" "third" "fourth"])
+                         {:id id :task "first"})))
+
+    (fact "deletes in-between todo"
+      (let [id 2]
+        (delete-todo! id) =>
+          (every-checker (file-saved ["first" "third" "fourth"])
+                         {:id id :task "second"})))
+
+    (fact "deletes last todo"
+      (let [id 4]
+        (delete-todo! id) =>
+          (every-checker (file-saved ["first" "second" "third"])
+                         {:id id :task "fourth"})))
 
     (fact "finds all todos"
-      (find-all) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])
+      (find-all) => [{:id 1 :task "first"}
+                     {:id 2 :task "second"}
+                     {:id 3 :task "third"}
+                     {:id 4 :task "fourth"}])
 
     (fact "finds todo by line number"
       (find-by-line-number 1) => {:id 1 :task "first"}
-      (find-by-line-number 3) => {:id 3 :task "third"})))
+      (find-by-line-number 3) => {:id 3 :task "third"}
+      (find-by-line-number 4) => {:id 4 :task "fourth"})))
