@@ -10,6 +10,9 @@
       (count (line-seq r)))
     0))
 
+(defn next-line-num [f]
+  (+ (count-lines f) 1))
+
 (defn read-lines [f]
   (if (file-exists? f)
     (with-open [r (reader f)]

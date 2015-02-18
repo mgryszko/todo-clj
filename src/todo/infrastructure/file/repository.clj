@@ -8,6 +8,13 @@
   (let [line-num (:id todo)] 
      (assoc lines (- line-num 1) (:task todo))))
 
+(defn- delete-nth-line [lines line-num]
+  (into [] (concat
+             (subvec lines 0 (- line-num 1))
+             (subvec lines line-num))))
+
+(defn- make-todo [line-num line] {:id line-num :task line})
+
 (defn update-todo! [todo]
   (let [lines (modify-nth-line (read-lines file-name) todo)
         temp-file (File/createTempFile "todo" nil)]
@@ -15,19 +22,9 @@
     (atomic-move temp-file file-name))
   todo)
 
-(defn- next-line-num []
-  (+ (count-lines file-name) 1))
-
 (defn add-todo! [todo]
-  (->> (assoc todo :id (next-line-num))
+  (->> (assoc todo :id (next-line-num file-name))
        (update-todo!)))
-
-(defn- delete-nth-line [lines line-num]
-  (into [] (concat
-             (subvec lines 0 (- line-num 1))
-             (subvec lines line-num))))
-
-(defn- make-todo [line-num line] {:id line-num :task line})
 
 (defn delete-todo! [line-num]
   (let [lines (read-lines file-name)
