@@ -24,9 +24,9 @@
 (defn- update [[id & task-parts]]
   (let [task (as-task task-parts)
         todo {:id id :task task}]
-    (val/proceed-if (core/can-todo-be-updated? repo/id-exists? todo)
+    (val/proceed-if (core/can-todo-be-updated? repo/line-num-exists? todo)
       (let [old-todo (core/find-todo-by-id repo/find-by-line-number id)]
-      (->> (core/update-todo repo/id-exists? repo/update-todo! todo)
+      (->> (core/update-todo repo/line-num-exists? repo/update-todo! todo)
            (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
 (defn- delete [[id]]

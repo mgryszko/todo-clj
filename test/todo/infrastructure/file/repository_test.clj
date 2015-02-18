@@ -38,22 +38,22 @@
           (every-checker (file-saved ["first" "second" "third" "updated"]) todo)))
     
     (fact "deletes first todo"
-      (let [id 1]
-        (delete-todo! id) =>
+      (let [line-num 1]
+        (delete-todo! line-num) =>
           (every-checker (file-saved ["second" "third" "fourth"])
-                         {:id id :task "first"})))
+                         {:id line-num :task "first"})))
 
     (fact "deletes in-between todo"
-      (let [id 2]
-        (delete-todo! id) =>
+      (let [line-num 2]
+        (delete-todo! line-num) =>
           (every-checker (file-saved ["first" "third" "fourth"])
-                         {:id id :task "second"})))
+                         {:id line-num :task "second"})))
 
     (fact "deletes last todo"
-      (let [id 4]
-        (delete-todo! id) =>
+      (let [line-num 4]
+        (delete-todo! line-num) =>
           (every-checker (file-saved ["first" "second" "third"])
-                         {:id id :task "fourth"})))
+                         {:id line-num :task "fourth"})))
 
     (fact "finds all todos"
       (find-all) => [{:id 1 :task "first"}
