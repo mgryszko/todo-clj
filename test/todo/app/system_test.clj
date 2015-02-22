@@ -34,15 +34,21 @@
       (with-main "add" "") => (every-checker expected-message file-not-created)))
 
   (against-background [(before :facts (add-silently "first"))]
-    (fact "updated todo with nonexisting task number is rejected"
-      (with-main "update" 2) => "No task with number 2!")
+    (fact "updated todo with nonexisting todo number is rejected"
+      (with-main "update" 2) => "No todo with number 2!")
 
     (fact "updated todo without task is rejected"
       (with-main "update" 1 " \t\n ") => "Empty task!"))
 
   (against-background [(before :facts (add-silently "first" "second" "third"))]
     (fact "deletes a todo"
-      (with-main "delete" 2) => (file-saved ["first" "third"])))
+      (with-main "delete" 2) => (file-saved ["first" "third"]))
+
+    (fact "cannot delete a nonexisting todo number"
+      (with-main "delete" 4) => "No todo with number 4!")
+    
+    (fact "cannot delete a todo without the number"
+      (with-main "delete") => "No todo number given!"))
 
   (against-background [(before :facts (add-silently "first" "second" "third"))]
     (fact "lists todos"

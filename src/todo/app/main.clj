@@ -30,8 +30,9 @@
            (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
 (defn- delete [[id]]
-  (->> (core/delete-todo repo/delete-todo! id)
-       (print-formatted "Deleted: ")))
+  (val/proceed-if (core/can-todo-be-deleted? repo/line-num-exists? id)
+   (->> (core/delete-todo repo/line-num-exists? repo/delete-todo! id)
+       (print-formatted "Deleted: "))))
 
 (defn- find-all [_]
   (let [todos (core/find-all-todos repo/find-all)]

@@ -2,7 +2,8 @@
 
 (def ^{:private true} messages
   {:task_empty "Empty task!"
-   :id_not_found "No task with number %s!"})
+   :id_mandatory "No todo number given!"
+   :id_not_found "No todo with number %s!"})
 
 (defn print-message [key & args]
   (->> (apply format (into [(key messages)] args))

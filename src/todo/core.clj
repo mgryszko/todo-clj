@@ -24,7 +24,14 @@
   (proceed-if (can-todo-be-updated? id-exists-fn todo))
   (save-fn! todo))
 
-(defn delete-todo [delete-fn! id]
+(defn can-todo-be-deleted? [id-exists-fn id]
+  (cond
+    (not id) [:id_mandatory]
+    (not (id-exists-fn id)) [:id_not_found id]
+    :else [:ok]))
+
+(defn delete-todo [id-exists-fn delete-fn! id]
+  (proceed-if (can-todo-be-deleted? id-exists-fn id))
   (delete-fn! id))
 
 (defn find-todo-by-id [find-by-id-fn id] (find-by-id-fn id))
