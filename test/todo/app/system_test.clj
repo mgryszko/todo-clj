@@ -24,9 +24,11 @@
     (with-main "add" "third") =>
       (every-checker "Added: 3 third" (file-saved ["first" "second" "third"]))
     (with-main "update" 1 "first updated") =>
-      (every-checker "Updated: 1 first\n     to: 1 first updated" (file-saved ["first updated" "second" "third"]))
+      (every-checker "Updated: 1 first\n     to: 1 first updated" 
+                     (file-saved ["first updated" "second" "third"]))
     (with-main "update" 3 "third updated") =>
-      (every-checker "Updated: 3 third\n     to: 3 third updated" (file-saved ["first updated" "second" "third updated"])))
+      (every-checker "Updated: 3 third\n     to: 3 third updated" 
+                     (file-saved ["first updated" "second" "third updated"])))
 
   (fact "new todo without task is rejected"
     (let [expected-message "Empty task!"]
@@ -36,9 +38,12 @@
   (against-background [(before :facts (add-silently "first"))]
     (fact "updated todo with nonexisting todo number is rejected"
       (with-main "update" 2) => "No todo with number 2!")
-
+    
     (fact "updated todo without task is rejected"
-      (with-main "update" 1 " \t\n ") => "Empty task!"))
+      (with-main "update" 1 " \t\n ") => "Empty task!")
+    
+    (fact "updated todo number can be passed as string"
+      (with-main "update" "1" "updated") => truthy))
 
   (against-background [(before :facts (add-silently "first" "second" "third"))]
     (fact "deletes a todo"
@@ -48,7 +53,10 @@
       (with-main "delete" 4) => "No todo with number 4!")
     
     (fact "cannot delete a todo without the number"
-      (with-main "delete") => "No todo number given!"))
+      (with-main "delete") => "No todo number given!")
+
+    (fact "deleted todo number can be passed as string"
+      (with-main "delete" "1") => truthy))
 
   (against-background [(before :facts (add-silently "first" "second" "third"))]
     (fact "lists todos"

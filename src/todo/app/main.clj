@@ -21,18 +21,27 @@
       (->> (core/add-todo repo/add-todo! task)
            (print-formatted "Added: ")))))
 
-(defn- update [[id & task-parts]]
-  (let [task (as-task task-parts)
+(defn- ->int [x] 
+  (if (number? x) 
+    x 
+    (try 
+      (Integer/parseInt x)
+      (catch NumberFormatException _ x))))
+
+(defn- update [[string-id & task-parts]]
+  (let [id (->int string-id)
+        task (as-task task-parts)
         todo {:id id :task task}]
     (val/proceed-if (core/can-todo-be-updated? repo/line-num-exists? todo)
       (let [old-todo (core/find-todo-by-id repo/find-by-line-number id)]
       (->> (core/update-todo repo/line-num-exists? repo/update-todo! todo)
            (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
-(defn- delete [[id]]
-  (val/proceed-if (core/can-todo-be-deleted? repo/line-num-exists? id)
-   (->> (core/delete-todo repo/line-num-exists? repo/delete-todo! id)
-       (print-formatted "Deleted: "))))
+(defn- delete [[string-id]]
+  (let [id (->int string-id)]
+    (val/proceed-if (core/can-todo-be-deleted? repo/line-num-exists? id)
+      (->> (core/delete-todo repo/line-num-exists? repo/delete-todo! id)
+        (print-formatted "Deleted: ")))))
 
 (defn- find-all [_]
   (let [todos (core/find-all-todos repo/find-all)]
