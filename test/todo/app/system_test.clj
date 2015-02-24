@@ -38,6 +38,9 @@
   (against-background [(before :facts (add-silently "first"))]
     (fact "updated todo with nonexisting todo number is rejected"
       (with-main "update" 2) => "No todo with number 2!")
+
+    (fact "updated todo with non-numeric todo number is rejected"
+      (with-main "update" "two") => "No todo with number two!")
     
     (fact "updated todo without task is rejected"
       (with-main "update" 1 " \t\n ") => "Empty task!")
@@ -49,10 +52,13 @@
     (fact "deletes a todo"
       (with-main "delete" 2) => (file-saved ["first" "third"]))
 
-    (fact "cannot delete a nonexisting todo number"
+    (fact "deletion of a nonexisting todo number is rejected"
       (with-main "delete" 4) => "No todo with number 4!")
+
+    (fact "delete of todo with non-numeric todo number is rejected"
+      (with-main "delete" "two") => "No todo with number two!")
     
-    (fact "cannot delete a todo without the number"
+    (fact "deletion of a todo without the number is rejected"
       (with-main "delete") => "No todo number given!")
 
     (fact "deleted todo number can be passed as string"

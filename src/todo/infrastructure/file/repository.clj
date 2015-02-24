@@ -35,7 +35,7 @@
     (make-todo line-num (get lines (- line-num 1)))))
 
 (defn line-num-exists? [line-num]
-  (and (>= line-num 1) (<= line-num (count-lines file-name))))
+  (and (number? line-num) (>= line-num 1) (<= line-num (count-lines file-name))))
 
 (defn find-all []
   (let [lines (read-lines file-name)

@@ -55,6 +55,14 @@
           (every-checker (file-saved ["first" "second" "third"])
                          {:id line-num :task "fourth"})))
 
+    (fact "checks if a line number exists"
+      (line-num-exists? 0) => false
+      (line-num-exists? 1) => true
+      (line-num-exists? 4) => true
+      (line-num-exists? 5) => false
+      (line-num-exists? "1") => false
+      (line-num-exists? "one") => false)
+
     (fact "finds all todos"
       (find-all) => [{:id 1 :task "first"}
                      {:id 2 :task "second"}
