@@ -1,8 +1,9 @@
 (ns todo.infrastructure.file.repository
-  (:require [todo.infrastructure.file.operations :refer :all])
+  (:require [todo.infrastructure.file.operations :refer :all]
+            [environ.core :refer [env]])
   (:import [java.io File]))
 
-(def file-name "todo.txt")
+(def file-name (or (env :todo-file) "todo.txt"))
 
 (defn- modify-nth-line [lines todo]
   (let [line-num (:id todo)] 
