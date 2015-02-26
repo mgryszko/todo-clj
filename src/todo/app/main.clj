@@ -1,8 +1,9 @@
 (ns todo.app.main
-  (require [clojure.string :refer [join]]
-           [todo.app.validation :as val]
-           [todo.core :as core]
-           [todo.infrastructure.file.repository :as repo])
+  (:require [clojure.string :refer [join]]
+            [todo.app.validation :as val]
+            [todo.core :as core]
+            [todo.infrastructure.file.repository :as repo]
+            [clj-stacktrace.repl :as stacktrace])
   (:gen-class))
 
 (defn- as-task [task-parts] (join " " task-parts))
@@ -15,18 +16,18 @@
        (str text)
        (println)))
 
-(defn- add [task-parts]
-  (let [task (as-task task-parts)]
-    (val/proceed-if (core/can-todo-be-added? task)
-      (->> (core/add-todo repo/add-todo! task)
-           (print-formatted "Added: ")))))
-
 (defn- ->int [x] 
   (if (number? x) 
     x 
     (try 
       (Integer/parseInt x)
       (catch NumberFormatException _ x))))
+
+(defn- add [task-parts]
+  (let [task (as-task task-parts)]
+    (val/proceed-if (core/can-todo-be-added? task)
+      (->> (core/add-todo repo/add-todo! task)
+           (print-formatted "Added: ")))))
 
 (defn- update [[string-id & task-parts]]
   (let [id (->int string-id)
@@ -66,7 +67,14 @@
     "list" find-all
     print-usage))
 
+(def handler (reify Thread$UncaughtExceptionHandler
+  (uncaughtException [_ _ e]
+    (if (instance? java.io.IOException e)
+      (println "Unexpected file error occurred. Verify your todo file the requested operation was performed."))
+    (stacktrace/pst-on *err* false e))))
+
 (defn -main [& args]
+  (Thread/setDefaultUncaughtExceptionHandler handler)
   (let [command (command-from-args args)]
     (command (rest args))))
 
