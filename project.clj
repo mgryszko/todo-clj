@@ -1,4 +1,4 @@
-(defproject todo-clj "0.0.0-SNAPSHOT"
+(defproject todo-clj "0.0.0"
   :description "todo app"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [environ "1.0.0"]
