@@ -1,6 +1,6 @@
-(ns todo.app.main
+(ns todo.app.cli.main
   (:require [clojure.string :refer [join]]
-            [todo.app.validation :as val]
+            [todo.app.cli.validation :as val]
             [todo.core :as core]
             [todo.infrastructure.file.repository :as repo]
             [clj-stacktrace.repl :as stacktrace])

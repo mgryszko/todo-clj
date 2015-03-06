@@ -1,8 +1,8 @@
-(ns todo.app.system-test
+(ns todo.app.cli.system-test
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [midje.sweet :refer :all]
-            [todo.app.main :refer [-main]]
+            [todo.app.cli.main :refer [-main]]
             [todo.infrastructure.file.checkers :refer :all]
             [todo.infrastructure.file.test-operations :refer :all]))
 

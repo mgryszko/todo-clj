@@ -1,4 +1,4 @@
-(ns todo.app.validation)
+(ns todo.app.cli.validation)
 
 (def ^{:private true} messages
   {:task_empty "Empty task!"
