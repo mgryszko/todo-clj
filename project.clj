@@ -9,7 +9,9 @@
   :plugins [[lein-environ "1.0.0"]
             [lein-ring "0.9.2"]]
   :profiles {:uberjar {:aot :all}
-             :dev {:dependencies [[midje "1.6.3" :exclusions [org.clojure/clojure]]]
+             :dev {:dependencies [[midje "1.6.3" :exclusions [org.clojure/clojure]]
+                                  [clj-http "1.0.1"]
+                                  [ring-server "0.4.0"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-bin "0.3.4"]]
                    :env {:todo-file "target/todo.txt"}}}
