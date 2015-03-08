@@ -17,7 +17,8 @@
 (against-background [(before :contents (start-server))
                      (after :contents (stop-server))]
   (facts "todo application"
-    (fact "responds with hello world" 
-      (let [result (http/get "http://localhost:3000/hello")]
-        (:status result) => 200))))
+    (fact "lists todos"
+      (let [response (http/get "http://localhost:3000/todos" {:as :json})]
+        (:status response) => 200
+        (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]))))
 
