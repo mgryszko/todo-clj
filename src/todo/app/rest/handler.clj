@@ -1,11 +1,15 @@
 (ns todo.app.rest.handler
-  (:require [liberator.core :refer [resource defresource]]
+  (:require [compojure.core :refer [defroutes GET]] 
+            [liberator.core :refer [resource defresource]]
             [ring.middleware.params :refer [wrap-params]]
-            [compojure.core :refer [defroutes GET]]))
+            [todo.core :as core]
+            [todo.infrastructure.file.repository :as repo]))
+
+(defn- find-all [_] (core/find-all-todos repo/find-all))
 
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
-                             :handle-ok [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))
+                             :handle-ok find-all)))
 
 (def handler 
   (-> app wrap-params))

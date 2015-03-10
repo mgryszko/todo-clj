@@ -7,7 +7,3 @@
 (defchecker file-saved [expected-todos]
   (chatty-checker [_]
     (= (get-todos) expected-todos)))
-
-(defchecker file-not-created [_]
-  (not (file-exists? file-name)))
-

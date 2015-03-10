@@ -32,8 +32,8 @@
 
   (fact "new todo without task is rejected"
     (let [expected-message "Empty task!"]
-      (with-main "add") => (every-checker expected-message file-not-created)
-      (with-main "add" "") => (every-checker expected-message file-not-created)))
+      (with-main "add") => expected-message 
+      (with-main "add" "") => expected-message))
 
   (against-background [(before :facts (add-silently "first"))]
     (fact "updated todo with nonexisting todo number is rejected"

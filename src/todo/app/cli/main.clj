@@ -1,9 +1,9 @@
 (ns todo.app.cli.main
   (:require [clojure.string :refer [join]]
+            [clj-stacktrace.repl :as stacktrace]
             [todo.app.cli.validation :as val]
             [todo.core :as core]
-            [todo.infrastructure.file.repository :as repo]
-            [clj-stacktrace.repl :as stacktrace])
+            [todo.infrastructure.file.repository :as repo])
   (:gen-class))
 
 (defn- as-task [task-parts] (join " " task-parts))
