@@ -1,6 +1,6 @@
 (ns todo.app.rest.handler
   (:require [clojure.data.json :as json]
-            [compojure.core :refer [defroutes GET POST]] 
+            [compojure.core :refer [defroutes GET POST PUT]] 
             [liberator.core :refer [resource defresource]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.core :as core]
@@ -25,12 +25,22 @@
     (let [todo (core/add-todo repo/add-todo! (:task body))]
       {::todo todo})))
 
+(defn- update [ctx]
+  (let [body (body-as-json ctx)]
+    (let [todo (core/update-todo repo/line-num-exists? repo/update-todo! body)]
+      {::todo todo})))
+
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
                              :handle-ok find-all))
   (POST "/todos" [] (resource :allowed-methods [:post]
                               :post! add
-                              :handle-created todo-as-json-str)))
+                              :handle-created todo-as-json-str))
+  (PUT "/todos" [] (resource :allowed-methods [:put]
+                             :put! update
+                             :new? false
+                             :respond-with-entity? true
+                             :handle-ok todo-as-json-str)))
 
 (def handler 
   (-> app wrap-params))

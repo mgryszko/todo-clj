@@ -29,5 +29,14 @@
                                  :content-type :json
                                  :as :json})]
         (:status response) => 201
-        (:body response) => {:id 1 :task "first"}))))
+        (:body response) => {:id 1 :task "first"}))
+
+    (against-background [(before :facts [(add-todo! {:task "first"})])]
+      (fact "updates a todo"
+        (let [response (http/put "http://localhost:3000/todos"
+                                {:form-params {:id 1 :task "first updated"}
+                                 :content-type :json
+                                 :as :json})]
+        (:status response) => 200
+        (:body response) => {:id 1 :task "first updated"})))))
 
