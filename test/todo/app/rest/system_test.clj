@@ -21,5 +21,13 @@
       (fact "lists todos"
         (let [response (http/get "http://localhost:3000/todos" {:as :json})]
           (:status response) => 200
-          (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))))
+          (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))
+
+    (fact "adds a todo"
+      (let [response (http/post "http://localhost:3000/todos"
+                                {:form-params {:task "first"}
+                                 :content-type :json
+                                 :as :json})]
+        (:status response) => 201
+        (:body response) => {:id 1 :task "first"}))))
 
