@@ -34,9 +34,11 @@
   (GET "/todos" [] (resource :available-media-types ["application/json"]
                              :handle-ok find-all))
   (POST "/todos" [] (resource :allowed-methods [:post]
+                              :available-media-types ["application/json"]
                               :post! add
                               :handle-created todo-as-json-str))
   (PUT "/todos" [] (resource :allowed-methods [:put]
+                             :media-type-available? true
                              :put! update
                              :new? false
                              :respond-with-entity? true
