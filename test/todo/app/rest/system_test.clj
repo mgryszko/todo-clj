@@ -29,12 +29,13 @@
                                  :content-type :json
                                  :as :json})]
         (:status response) => 201
+        (get-in response [:headers :location]) => (has-suffix "/todos/1") 
         (:body response) => {:id 1 :task "first"}))
 
     (against-background [(before :facts [(add-todo! {:task "first"})])]
       (fact "updates a todo"
-        (let [response (http/put "http://localhost:3000/todos"
-                                {:form-params {:id 1 :task "first updated"}
+        (let [response (http/put "http://localhost:3000/todos/1"
+                                {:form-params {:task "first updated"}
                                  :content-type :json
                                  :as :json})]
         (:status response) => 200

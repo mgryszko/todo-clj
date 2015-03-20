@@ -4,7 +4,8 @@
             [liberator.core :refer [resource defresource]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.core :as core]
-            [todo.infrastructure.file.repository :as repo]))
+            [todo.infrastructure.file.repository :as repo])
+  (:import [java.net URL]))
 
 (defn- find-all [_]
   (core/find-all-todos repo/find-all))
@@ -20,29 +21,43 @@
 (defn- todo-as-json-str [ctx]
   (json/write-str (::todo ctx)))
 
+(defn- build-entry-url [request id]
+  (URL. (format "%s://%s:%s%s/%d"
+                (name (:scheme request))
+                (:server-name request)
+                (:server-port request)
+                (:uri request)
+                id)))
+
+(defn- todo-location [ctx]
+  (build-entry-url (:request ctx) (get-in ctx [::todo :id])))
+
 (defn- add [ctx]
   (let [body (body-as-json ctx)]
     (let [todo (core/add-todo repo/add-todo! (:task body))]
       {::todo todo})))
 
-(defn- update [ctx]
-  (let [body (body-as-json ctx)]
-    (let [todo (core/update-todo repo/line-num-exists? repo/update-todo! body)]
-      {::todo todo})))
+(defn- update [ctx id]
+  (let [body (body-as-json ctx)
+        todo (assoc body :id (Integer/parseInt id))]
+    {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)}))
 
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
                              :handle-ok find-all))
+
   (POST "/todos" [] (resource :allowed-methods [:post]
                               :available-media-types ["application/json"]
                               :post! add
+                              :location todo-location
                               :handle-created todo-as-json-str))
-  (PUT "/todos" [] (resource :allowed-methods [:put]
-                             :media-type-available? true
-                             :put! update
-                             :new? false
-                             :respond-with-entity? true
-                             :handle-ok todo-as-json-str)))
+
+  (PUT "/todos/:id" [id] (resource :allowed-methods [:put]
+                                   :media-type-available? true
+                                   :put! (fn [ctx] (update ctx id))
+                                   :new? false
+                                   :respond-with-entity? true
+                                   :handle-ok todo-as-json-str)))
 
 (def handler 
   (-> app wrap-params))
