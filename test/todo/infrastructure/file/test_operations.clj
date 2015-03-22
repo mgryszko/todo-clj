@@ -4,7 +4,7 @@
              [todo.infrastructure.file.repository :refer [file-name]]))
 
 (defn delete-todo-file []
-    (io/delete-file file-name true))
+  (io/delete-file file-name true))
 
 (defn get-todos []
   (str/split-lines (slurp file-name)))
