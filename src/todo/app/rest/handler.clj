@@ -1,7 +1,7 @@
 (ns todo.app.rest.handler
   (:require [clojure.data.json :as json]
             [compojure.core :refer [defroutes GET POST PUT]] 
-            [liberator.core :refer [resource defresource]]
+            [liberator.core :refer [resource]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.core :as core]
             [todo.infrastructure.file.repository :as repo])
@@ -9,6 +9,9 @@
 
 (defn- find-all [_]
   (core/find-all-todos repo/find-all))
+
+(defn- find-by-id [id]
+  (core/find-todo-by-id repo/find-by-line-number (Integer/parseInt id)))
 
 (defn- body-as-string [ctx]
   (let [body (get-in ctx [:request :body])]
@@ -45,6 +48,9 @@
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
                              :handle-ok find-all))
+
+  (GET "/todos/:id" [id] (resource :available-media-types ["application/json"]
+                                   :handle-ok (fn [_] (find-by-id id))))
 
   (POST "/todos" [] (resource :allowed-methods [:post]
                               :available-media-types ["application/json"]

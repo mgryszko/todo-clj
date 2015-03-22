@@ -11,17 +11,21 @@
 
 (against-background [(before :contents (start-server port))
                      (after :contents (stop-server))
-                     (before :facts (delete-todo-file)) 
-                     (after :facts (delete-todo-file))]
+                     (before :facts (delete-todo-file) :after (delete-todo-file))]
 
   (facts "todo application"
     (against-background [(before :facts [(add-todo! {:task "first"})
                                          (add-todo! {:task "second"})
                                          (add-todo! {:task "third"})])]
-      (fact "lists todos"
+      (fact "lists all todos"
         (let [response (http/get "http://localhost:3000/todos" {:as :json})]
           (:status response) => 200
-          (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}])))
+          (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]))
+      
+      (fact "lists single todo"
+        (let [response (http/get "http://localhost:3000/todos/1" {:as :json})]
+          (:status response) => 200
+          (:body response) => {:id 1 :task "first"})))
 
     (fact "adds a todo"
       (let [response (http/post "http://localhost:3000/todos"
