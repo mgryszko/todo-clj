@@ -15,6 +15,9 @@
                    :plugins [[lein-midje "3.1.1"]
                              [lein-bin "0.3.4"]]
                    :env {:todo-file "target/todo.txt"}}}
+  :repl-options {:init (do
+                         (use 'midje.repl) 
+                         (autotest))}
   :main todo.app.cli.main
   :bin  {:name "todo" :bootclasspath true}
   :ring {:handler todo.app.rest.handler/handler})
