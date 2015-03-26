@@ -21,6 +21,11 @@
   (-> (body-as-string ctx)
       (json/read-str :key-fn keyword)))
 
+(defn- parse-json [ctx]
+  (try 
+    [false {::data (body-as-json ctx)}]
+    (catch Exception e [true {:representation {:media-type "application/json"}}])))
+
 (defn- todo-as-json-str [ctx]
   (json/write-str (::todo ctx)))
 
@@ -36,8 +41,8 @@
   (build-entry-url (:request ctx) (get-in ctx [::todo :id])))
 
 (defn- add [ctx]
-  (let [body (body-as-json ctx)]
-    (let [todo (core/add-todo repo/add-todo! (:task body))]
+  (let [data (::data ctx)]
+    (let [todo (core/add-todo repo/add-todo! (:task data))]
       {::todo todo})))
 
 (defn- update [ctx id]
@@ -54,6 +59,8 @@
 
   (POST "/todos" [] (resource :allowed-methods [:post]
                               :available-media-types ["application/json"]
+                              :malformed? parse-json
+                              :handle-malformed {:message "Unparseable JSON"}
                               :post! add
                               :location todo-location
                               :handle-created todo-as-json-str))

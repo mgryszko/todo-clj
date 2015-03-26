@@ -1,5 +1,6 @@
 (ns todo.app.rest.system-test
-  (:require [clj-http.client :as http] 
+  (:require [clojure.data.json :as json]
+            [clj-http.client :as http] 
             [midje.sweet :refer :all]
             [ring.server.standalone :as server]
             [todo.app.rest.handler :refer [handler]]
@@ -35,6 +36,13 @@
         (:status response) => 201
         (get-in response [:headers :location]) => (has-suffix "/todos/1") 
         (:body response) => {:id 1 :task "first"}))
+
+    (fact "adding without a body returns 400"
+      (let [response (http/post "http://localhost:3000/todos"
+                                {:throw-exceptions false
+                                 :as :json})]
+        (:status response) => 400 
+        (json/read-str (:body response) :key-fn keyword) => (fn [actual] (contains? actual :message))))
 
     (against-background [(before :facts [(add-todo! {:task "first"})])]
       (fact "updates a todo"
