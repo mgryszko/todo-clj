@@ -30,9 +30,10 @@
           (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]))
       
       (fact "lists single todo"
-        (let [response (http/get (todos-url 1) {:as :json})]
+        (let [id 1
+              response (http/get (todos-url id) {:as :json})]
           (:status response) => 200
-          (:body response) => {:id 1 :task "first"})))
+          (:body response) => {:id id :task "first"})))
 
     (fact "adds a todo"
       (let [response (http/post (todos-url)
@@ -52,10 +53,11 @@
 
     (against-background [(before :facts [(add-todo! {:task "first"})])]
       (fact "updates a todo"
-        (let [response (http/put (todos-url 1)
-                                {:form-params {:task "first updated"}
-                                 :content-type :json
-                                 :as :json})]
+        (let [id 1
+              response (http/put (todos-url id)
+                                 {:form-params {:task "first updated"}
+                                  :content-type :json
+                                  :as :json})]
         (:status response) => 200
-        (:body response) => {:id 1 :task "first updated"})))))
+        (:body response) => {:id id :task "first updated"})))))
 
