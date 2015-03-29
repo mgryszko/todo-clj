@@ -9,7 +9,7 @@
 (defmacro with-main [command & args]
   `(str/trim (with-out-str (-main ~command ~@args))))
 
-(defn add-silently [& tasks]
+(defn- add-silently [& tasks]
   (doall (map #(with-main "add" %) tasks)))
 
 (background (before :facts (delete-todo-file))
