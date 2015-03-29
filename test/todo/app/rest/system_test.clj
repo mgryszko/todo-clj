@@ -6,7 +6,7 @@
             [todo.app.rest.handler :refer [handler]]
             [todo.app.rest.server :refer :all]
             [todo.infrastructure.file.repository :refer [add-todo!]]
-            [todo.infrastructure.file.test-operations :refer :all]))
+            [todo.infrastructure.file.test-operations :refer [delete-todo-file]]))
 
 (def port 3000)
 
@@ -15,6 +15,25 @@
 (defn- todos-url
   ([] base-todos-url)
   ([id] (str base-todos-url "/" id)))
+
+(defn- get-todos
+  ([] (http/get (todos-url) {:as :json}))
+  ([id] (http/get (todos-url id) {:as :json})))
+
+(defn- post-todo 
+  ([task] (http/post (todos-url)
+                     {:form-params {:task task}
+                      :content-type :json
+                      :as :json}))
+  ([] (http/post (todos-url)
+                     {:as :json
+                      :throw-exceptions false})))
+
+(defn- put-todo [todo]
+  (http/put (todos-url (:id todo))
+                       {:form-params todo
+                        :content-type :json
+                        :as :json}))
 
 (against-background [(before :contents (start-server port))
                      (after :contents (stop-server))
@@ -25,39 +44,31 @@
                                          (add-todo! {:task "second"})
                                          (add-todo! {:task "third"})])]
       (fact "lists all todos"
-        (let [response (http/get (todos-url) {:as :json})]
+        (let [response (get-todos)]
           (:status response) => 200
           (:body response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]))
       
       (fact "lists single todo"
         (let [id 1
-              response (http/get (todos-url id) {:as :json})]
+              response (get-todos 1)]
           (:status response) => 200
           (:body response) => {:id id :task "first"})))
 
     (fact "adds a todo"
-      (let [response (http/post (todos-url)
-                                {:form-params {:task "first"}
-                                 :content-type :json
-                                 :as :json})]
+      (let [response (post-todo "first")]
         (:status response) => 201
         (get-in response [:headers :location]) => (has-suffix "/todos/1") 
         (:body response) => {:id 1 :task "first"}))
 
     (fact "adding without a body returns 400"
-      (let [response (http/post (todos-url)
-                                {:throw-exceptions false
-                                 :as :json})]
+      (let [response (post-todo)]
         (:status response) => 400 
         (json/read-str (:body response) :key-fn keyword) => (fn [actual] (contains? actual :message))))
 
     (against-background [(before :facts [(add-todo! {:task "first"})])]
       (fact "updates a todo"
         (let [id 1
-              response (http/put (todos-url id)
-                                 {:form-params {:task "first updated"}
-                                  :content-type :json
-                                  :as :json})]
+              response (put-todo {:id id :task "first updated"})]
         (:status response) => 200
         (:body response) => {:id id :task "first updated"})))))
 
