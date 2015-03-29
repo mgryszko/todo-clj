@@ -63,7 +63,7 @@
                               :handle-malformed {:message "Unparseable JSON"}
                               :post! add
                               :location todo-location
-                              :handle-created todo-as-json-str))
+                              :handle-created ::todo))
 
   (PUT "/todos/:id" [id] (resource :allowed-methods [:put]
                                    :media-type-available? true
