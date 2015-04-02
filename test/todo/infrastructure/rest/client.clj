@@ -2,8 +2,20 @@
   (:require [clojure.data.json :as json]
             [clj-http.client :as http]))
 
+(defn- location [response]
+  (get-in response [:headers :location]))
+
+(defn- body-as-json [response]
+  (let [body (:body response)]
+    (if (string? body)
+      (json/read-str body :key-fn keyword) 
+      body)))
+
 (defn- send-json [method url req]
-  (method url (merge {:content-type :json :as :json} (first req))))
+  (let [response (method url (merge {:content-type :json :as :json} (first req)))]
+    {:status (:status response)
+     :body (body-as-json response)
+     :location (location response)}))
 
 (defn- get-json [url & req]
   (send-json http/get url req))
@@ -44,11 +56,3 @@
 (defn delete-todo [id]
   (delete-json (todos-url id)))
 
-(defn location [response]
-  (get-in response [:headers :location]))
-
-(defn body-as-json [response]
-  (let [body (:body response)]
-    (if (string? body)
-      (json/read-str body :key-fn keyword) 
-      body)))
