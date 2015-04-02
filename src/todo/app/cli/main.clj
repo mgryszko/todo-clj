@@ -3,7 +3,8 @@
             [clj-stacktrace.repl :as stacktrace]
             [todo.app.cli.validation :as val]
             [todo.core :as core]
-            [todo.infrastructure.file.repository :as repo])
+            [todo.infrastructure.file.repository :as repo]
+            [todo.infrastructure.parse :as parse])
   (:gen-class))
 
 (defn- as-task [task-parts] (join " " task-parts))
@@ -16,13 +17,6 @@
        (str text)
        (println)))
 
-(defn- ->int [x] 
-  (if (number? x) 
-    x 
-    (try 
-      (Integer/parseInt x)
-      (catch NumberFormatException _ x))))
-
 (defn- add [task-parts]
   (let [task (as-task task-parts)]
     (val/proceed-if (core/can-todo-be-added? task)
@@ -30,7 +24,7 @@
            (print-formatted "Added: ")))))
 
 (defn- update [[string-id & task-parts]]
-  (let [id (->int string-id)
+  (let [id (parse/->int string-id)
         task (as-task task-parts)
         todo {:id id :task task}]
     (val/proceed-if (core/can-todo-be-updated? repo/line-num-exists? todo)
@@ -39,7 +33,7 @@
            (print-formatted (str "Updated: " (format-todo old-todo) "\n     to: ")))))))
 
 (defn- delete [[string-id]]
-  (let [id (->int string-id)]
+  (let [id (parse/->int string-id)]
     (val/proceed-if (core/can-todo-be-deleted? repo/line-num-exists? id)
       (->> (core/delete-todo repo/line-num-exists? repo/delete-todo! id)
         (print-formatted "Deleted: ")))))

@@ -4,14 +4,15 @@
             [liberator.core :refer [resource]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.core :as core]
-            [todo.infrastructure.file.repository :as repo])
+            [todo.infrastructure.file.repository :as repo]
+            [todo.infrastructure.parse :as parse])
   (:import [java.net URL]))
 
 (defn- find-all [_]
   (core/find-all-todos repo/find-all))
 
-(defn- find-by-id [id]
-  (core/find-todo-by-id repo/find-by-line-number (Integer/parseInt id)))
+(defn- find-by-id [string-id]
+  (core/find-todo-by-id repo/find-by-line-number (parse/->int string-id)))
 
 (defn- body-as-string [ctx]
   (let [body (get-in ctx [:request :body])]
@@ -42,13 +43,13 @@
     (let [todo (core/add-todo repo/add-todo! (:task data))]
       {::todo todo})))
 
-(defn- update [ctx id]
+(defn- update [ctx string-id]
   (let [data (::data ctx)
-        todo (assoc data :id (Integer/parseInt id))]
+        todo (assoc data :id (parse/->int string-id))]
     {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)}))
 
 (defn- delete [ctx string-id]
-  (let [id (Integer/parseInt string-id)]
+  (let [id (parse/->int string-id)]
     (core/delete-todo repo/line-num-exists? repo/delete-todo! id)))
 
 (defroutes app
