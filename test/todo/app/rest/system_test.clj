@@ -1,63 +1,9 @@
 (ns todo.app.rest.system-test
-  (:require [clojure.data.json :as json]
-            [clj-http.client :as http] 
-            [midje.sweet :refer :all]
-            [ring.server.standalone :as server]
-            [todo.app.rest.handler :refer [handler]]
-            [todo.app.rest.server :refer :all]
+  (:require [midje.sweet :refer :all]
+            [todo.infrastructure.rest.server :refer :all]
             [todo.infrastructure.file.repository :refer [add-todo!]]
-            [todo.infrastructure.file.test-operations :refer [delete-todo-file]]))
-
-(defn- send-json [method url req]
-  (method url (merge {:content-type :json :as :json} (first req))))
-
-(defn- get-json [url & req]
-  (send-json http/get url req))
-
-(defn- post-json [url & req]
-  (send-json http/post url req))
-
-(defn- put-json [url & req]
-  (send-json http/put url req))
-
-(defn- delete-json [url & req]
-  (send-json http/delete url req))
-
-(def port 3000)
-
-(def base-todos-url (str "http://localhost:" port "/todos"))
-
-(defn- todos-url
-  ([] base-todos-url)
-  ([id] (str base-todos-url "/" id)))
-
-(defn- get-todos []
-  (get-json (todos-url)))
-
-(defn- get-todo [id]
-  (get-json (todos-url id)))
-
-(defn- post-todo 
-  ([task] (post-json (todos-url) {:form-params {:task task}}))
-  ([] (post-json (todos-url) {:throw-exceptions false})))
-
-(defn- put-todo [todo]
-  (put-json (todos-url (:id todo)) {:form-params todo}))
-
-(defn- put-empty-todo [id]
-  (put-json (todos-url id) {:throw-exceptions false}))
-
-(defn- delete-todo [id]
-  (delete-json (todos-url id)))
-
-(defn- location [response]
-  (get-in response [:headers :location]))
-
-(defn- body-as-json [response]
-  (let [body (:body response)]
-    (if (string? body)
-      (json/read-str body :key-fn keyword) 
-      body)))
+            [todo.infrastructure.file.test-operations :refer [delete-todo-file]]
+            [todo.infrastructure.rest.client :refer :all]))
 
 (against-background [(before :contents (start-server port)
                              :after (stop-server))

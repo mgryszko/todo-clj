@@ -1,6 +1,7 @@
-(ns todo.app.rest.server
+(ns todo.infrastructure.rest.server
   (:require [ring.server.standalone :as server]
             [todo.app.rest.handler :refer [handler]]))
+
 (defonce server (atom nil))
 
 (defn start-server [port]
