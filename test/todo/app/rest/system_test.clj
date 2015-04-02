@@ -68,21 +68,24 @@
                              :after (delete-todo-file))]
   (facts "todo application"
     (fact "lists all todos"
-      (let [response (get-todos)]
+      (let [response (get-todos)
+            expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]]
         (:status response) => 200
-        (body-as-json response) => [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]))
+        (body-as-json response) => expected-todos))
     
     (fact "lists single todo"
       (let [id 1
-            response (get-todo 1)]
+            response (get-todo id)]
         (:status response) => 200
         (body-as-json response) => {:id id :task "first"}))
 
     (fact "updates a todo"
       (let [id 1
-            response (put-todo {:id id :task "first updated"})]
+            response (put-todo {:id id :task "first updated"})
+            expected-todos [{:id 1 :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
       (:status response) => 200
-      (body-as-json response) => {:id id :task "first updated"})) 
+      (body-as-json response) => {:id id :task "first updated"}
+      (body-as-json (get-todos)) => expected-todos)) 
 
     (fact "updating without a body returns 400"
       (let [response (put-empty-todo 1)]
@@ -90,11 +93,13 @@
         (body-as-json response) => (fn [actual] (contains? actual :message))))
 
     (fact "adds a todo"
-      (let [expected-id 4 
-            response (post-todo "first")]
+      (let [response (post-todo "fourth")
+            expected-id 4  
+            expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"} {:id expected-id :task "fourth"}]]
         (:status response) => 201
         (location response) => (todos-url expected-id) 
-        (body-as-json response) => {:id expected-id :task "first"}))
+        (body-as-json response) => {:id expected-id :task "fourth"}
+        (body-as-json (get-todos)) => expected-todos))
 
     (fact "adding without a body returns 400"
       (let [response (post-todo)]
@@ -102,6 +107,8 @@
         (body-as-json response) => (fn [actual] (contains? actual :message))))
 
     (fact "deletes a todo"
-      (let [response (delete-todo 1)]
-        (:status response) => 204))))
+      (let [response (delete-todo 1)
+            expected-todos [{:id 1 :task "second"} {:id 2 :task "third"}]]
+        (:status response) => 204
+        (body-as-json (get-todos)) => expected-todos))))
 
