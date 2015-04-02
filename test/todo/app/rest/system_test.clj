@@ -13,48 +13,57 @@
                                      (add-todo! {:task "third"})]
                              :after (delete-todo-file))]
   (facts "todo application"
-    (fact "lists all todos"
-      (let [response (get-todos)
-            expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]]
+
+    (facts "lists todos"
+       (fact "all"
+          (let [response (get-todos)
+                expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]]
+            (:status response) => 200
+            (:body response) => expected-todos))
+       
+        (fact "single"
+          (let [id 1
+                response (get-todo id)]
+            (:status response) => 200
+            (:body response) => {:id id :task "first"})))
+        
+
+    (facts "updates a todo"
+
+      (fact "successfully"
+        (let [id 1
+              response (put-todo {:id id :task "first updated"})
+              expected-todos [{:id 1 :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
         (:status response) => 200
-        (:body response) => expected-todos))
-    
-    (fact "lists single todo"
-      (let [id 1
-            response (get-todo id)]
-        (:status response) => 200
-        (:body response) => {:id id :task "first"}))
+        (:body response) => {:id id :task "first updated"}
+        (:body (get-todos)) => expected-todos)) 
 
-    (fact "updates a todo"
-      (let [id 1
-            response (put-todo {:id id :task "first updated"})
-            expected-todos [{:id 1 :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
-      (:status response) => 200
-      (:body response) => {:id id :task "first updated"}
-      (:body (get-todos)) => expected-todos)) 
+      (fact "without a body returns 400"
+        (let [response (put-empty-todo 1)]
+          (:status response) => 400 
+          (:body response) => (fn [actual] (contains? actual :message)))))
 
-    (fact "updating without a body returns 400"
-      (let [response (put-empty-todo 1)]
-        (:status response) => 400 
-        (:body response) => (fn [actual] (contains? actual :message))))
+    (facts "adds a todo"
 
-    (fact "adds a todo"
-      (let [response (post-todo "fourth")
-            expected-id 4  
-            expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"} {:id expected-id :task "fourth"}]]
-        (:status response) => 201
-        (:location response) => (todos-url expected-id) 
-        (:body response) => {:id expected-id :task "fourth"}
-        (:body (get-todos)) => expected-todos))
+      (fact "successfully"
+        (let [response (post-todo "fourth")
+              expected-id 4  
+              expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"} {:id expected-id :task "fourth"}]]
+          (:status response) => 201
+          (:location response) => (todos-url expected-id) 
+          (:body response) => {:id expected-id :task "fourth"}
+          (:body (get-todos)) => expected-todos))
 
-    (fact "adding without a body returns 400"
-      (let [response (post-todo)]
-        (:status response) => 400 
-        (:body response) => (fn [actual] (contains? actual :message))))
+      (fact "adding without a body returns 400"
+        (let [response (post-todo)]
+          (:status response) => 400 
+          (:body response) => (fn [actual] (contains? actual :message)))))
 
-    (fact "deletes a todo"
-      (let [response (delete-todo 1)
-            expected-todos [{:id 1 :task "second"} {:id 2 :task "third"}]]
-        (:status response) => 204
-        (:body (get-todos)) => expected-todos))))
+    (facts "deletes a todo" 
+
+      (fact "successfully"
+        (let [response (delete-todo 1)
+              expected-todos [{:id 1 :task "second"} {:id 2 :task "third"}]]
+          (:status response) => 204
+          (:body (get-todos)) => expected-todos)))))
 
