@@ -1,6 +1,6 @@
 (ns todo.app.rest.handler
   (:require [clojure.data.json :as json]
-            [compojure.core :refer [defroutes GET POST PUT]] 
+            [compojure.core :refer [defroutes GET POST PUT DELETE]] 
             [liberator.core :refer [resource]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.core :as core]
@@ -26,9 +26,6 @@
     [false {::data (body-as-json ctx)}]
     (catch Exception e [true {:representation {:media-type "application/json"}}])))
 
-(defn- todo-as-json-str [ctx]
-  (json/write-str (::todo ctx)))
-
 (defn- build-entry-url [request id]
   (URL. (format "%s://%s:%s%s/%d"
                 (name (:scheme request))
@@ -46,9 +43,13 @@
       {::todo todo})))
 
 (defn- update [ctx id]
-  (let [body (body-as-json ctx)
-        todo (assoc body :id (Integer/parseInt id))]
+  (let [data (::data ctx)
+        todo (assoc data :id (Integer/parseInt id))]
     {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)}))
+
+(defn- delete [ctx string-id]
+  (let [id (Integer/parseInt string-id)]
+    (core/delete-todo repo/line-num-exists? repo/delete-todo! id)))
 
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
@@ -66,11 +67,16 @@
                               :handle-created ::todo))
 
   (PUT "/todos/:id" [id] (resource :allowed-methods [:put]
-                                   :media-type-available? true
+                                   :available-media-types ["application/json"]
+                                   :malformed? parse-json
+                                   :handle-malformed {:message "Unparseable JSON"}
                                    :put! (fn [ctx] (update ctx id))
                                    :new? false
                                    :respond-with-entity? true
-                                   :handle-ok todo-as-json-str)))
+                                   :handle-ok ::todo))
+
+  (DELETE "/todos/:id" [id] (resource :allowed-methods [:delete]
+                                      :delete! (fn [ctx] (delete ctx id)))))
 
 (def handler 
   (-> app wrap-params))

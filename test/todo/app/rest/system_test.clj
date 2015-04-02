@@ -20,6 +20,9 @@
 (defn- put-json [url & req]
   (send-json http/put url req))
 
+(defn- delete-json [url & req]
+  (send-json http/delete url req))
+
 (def port 3000)
 
 (def base-todos-url (str "http://localhost:" port "/todos"))
@@ -28,9 +31,11 @@
   ([] base-todos-url)
   ([id] (str base-todos-url "/" id)))
 
-(defn- get-todos
-  ([] (get-json (todos-url)))
-  ([id] (get-json (todos-url id))))
+(defn- get-todos []
+  (get-json (todos-url)))
+
+(defn- get-todo [id]
+  (get-json (todos-url id)))
 
 (defn- post-todo 
   ([task] (post-json (todos-url) {:form-params {:task task}}))
@@ -38,6 +43,12 @@
 
 (defn- put-todo [todo]
   (put-json (todos-url (:id todo)) {:form-params todo}))
+
+(defn- put-empty-todo [id]
+  (put-json (todos-url id) {:throw-exceptions false}))
+
+(defn- delete-todo [id]
+  (delete-json (todos-url id)))
 
 (defn- location [response]
   (get-in response [:headers :location]))
@@ -63,7 +74,7 @@
     
     (fact "lists single todo"
       (let [id 1
-            response (get-todos 1)]
+            response (get-todo 1)]
         (:status response) => 200
         (body-as-json response) => {:id id :task "first"}))
 
@@ -72,6 +83,11 @@
             response (put-todo {:id id :task "first updated"})]
       (:status response) => 200
       (body-as-json response) => {:id id :task "first updated"})) 
+
+    (fact "updating without a body returns 400"
+      (let [response (put-empty-todo 1)]
+        (:status response) => 400 
+        (body-as-json response) => (fn [actual] (contains? actual :message))))
 
     (fact "adds a todo"
       (let [expected-id 4 
@@ -83,5 +99,9 @@
     (fact "adding without a body returns 400"
       (let [response (post-todo)]
         (:status response) => 400 
-        (body-as-json response) => (fn [actual] (contains? actual :message))))))
+        (body-as-json response) => (fn [actual] (contains? actual :message))))
+
+    (fact "deletes a todo"
+      (let [response (delete-todo 1)]
+        (:status response) => 204))))
 
