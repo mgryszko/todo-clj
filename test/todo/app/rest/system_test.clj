@@ -40,7 +40,7 @@
       (fact "with 400 error when no body"
         (let [response (put-invalid-todo {:id 1})]
           (:status response) => 400 
-          (:body response) => (fn [actual] (contains? actual :message))))
+          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
       
       (fact "with 422 error when todo id doesn't exist"
         (let [response (put-invalid-todo {:id 100 :task "updated"})]
@@ -71,7 +71,7 @@
       (fact "adding without a body returns 400"
         (let [response (post-todo)]
           (:status response) => 400 
-          (:body response) => (fn [actual] (contains? actual :message)))))
+          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"})))
 
     (facts "deletes a todo" 
 
