@@ -31,7 +31,7 @@
 
 (def port 3000)
 
-(def base-todos-url (str "http://localhost:" port "/todos"))
+(def ^{:private true} base-todos-url (str "http://localhost:" port "/todos"))
 
 (defn todos-url
   ([] base-todos-url)
@@ -50,8 +50,11 @@
 (defn put-todo [todo]
   (put-json (todos-url (:id todo)) {:form-params todo}))
 
-(defn put-empty-todo [id]
-  (put-json (todos-url id) {:throw-exceptions false}))
+(defn put-invalid-todo [{:keys [id] :as todo}]
+  (let [rest (dissoc todo :id)
+        contains-todo? (not (empty? rest))
+        request (merge {:throw-exceptions false} (if contains-todo? {:form-params todo}))]
+    (put-json (todos-url id) request)))
 
 (defn delete-todo [id]
   (delete-json (todos-url id)))

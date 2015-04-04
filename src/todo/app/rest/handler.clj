@@ -3,6 +3,7 @@
             [compojure.core :refer [defroutes GET POST PUT DELETE]] 
             [liberator.core :refer [resource]]
             [ring.middleware.params :refer [wrap-params]]
+            [todo.app.rest.validation :refer :all]
             [todo.core :as core]
             [todo.infrastructure.file.repository :as repo]
             [todo.infrastructure.parse :as parse])
@@ -43,14 +44,26 @@
     (let [todo (core/add-todo repo/add-todo! (:task data))]
       {::todo todo})))
 
-(defn- update [ctx string-id]
+(defn- update-processable? [ctx string-id]
   (let [data (::data ctx)
-        todo (assoc data :id (parse/->int string-id))]
+        todo (assoc data :id (parse/->int string-id))
+        validation-result (core/can-todo-be-updated? repo/line-num-exists? todo)]
+     (if (valid? validation-result)
+       [true {::todo todo}]
+       [false {::validation-result validation-result}])))
+
+(defn- update [ctx]
+  (let [todo (::todo ctx)]
     {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)}))
 
 (defn- delete [ctx string-id]
   (let [id (parse/->int string-id)]
     (core/delete-todo repo/line-num-exists? repo/delete-todo! id)))
+
+(defn- error-entity [ctx]
+  (let [[code args] (::validation-result ctx)] 
+    {:code code
+     :message (format-message code args)}))
 
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
@@ -71,7 +84,9 @@
                                    :available-media-types ["application/json"]
                                    :malformed? parse-json
                                    :handle-malformed {:message "Unparseable JSON"}
-                                   :put! (fn [ctx] (update ctx id))
+                                   :processable? (fn [ctx] (update-processable? ctx id))
+                                   :handle-unprocessable-entity error-entity
+                                   :put! update
                                    :new? false
                                    :respond-with-entity? true
                                    :handle-ok ::todo))

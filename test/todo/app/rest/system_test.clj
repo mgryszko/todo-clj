@@ -26,7 +26,6 @@
                 response (get-todo id)]
             (:status response) => 200
             (:body response) => {:id id :task "first"})))
-        
 
     (facts "updates a todo"
 
@@ -38,10 +37,25 @@
         (:body response) => {:id id :task "first updated"}
         (:body (get-todos)) => expected-todos)) 
 
-      (fact "without a body returns 400"
-        (let [response (put-empty-todo 1)]
+      (fact "with 400 error when no body"
+        (let [response (put-invalid-todo {:id 1})]
           (:status response) => 400 
-          (:body response) => (fn [actual] (contains? actual :message)))))
+          (:body response) => (fn [actual] (contains? actual :message))))
+      
+      (fact "with 422 error when todo id doesn't exist"
+        (let [response (put-invalid-todo {:id 100 :task "updated"})]
+          (:status response) => 422
+          (:body response) => {:code "id_not_found" :message "No todo with number 100"}))
+
+      (fact "with 422 error when todo id is non-numeric"
+        (let [response (put-invalid-todo {:id "one" :task "updated"})]
+          (:status response) => 422
+          (:body response) => {:code "id_not_found" :message "No todo with number one"}))
+
+      (fact "with 422 error when task is empty"
+        (let [response (put-invalid-todo {:id 1 :task " \t\n "})]
+          (:status response) => 422
+          (:body response) => {:code "task_empty" :message "Empty task"})))
 
     (facts "adds a todo"
 
