@@ -43,8 +43,12 @@
   (get-json (todos-url id)))
 
 (defn post-todo 
-  ([task] (post-json (todos-url) {:form-params {:task task}}))
-  ([] (post-json (todos-url) {:throw-exceptions false})))
+  ([todo] (post-json (todos-url) {:form-params todo})))
+
+(defn post-invalid-todo [todo]
+  (let [contains-todo? (not (empty? todo))
+        request (merge {:throw-exceptions false} (if contains-todo? {:form-params todo}))]
+    (post-json (todos-url) request)))
 
 (defn put-todo [{:keys [id] :as todo}]
   (put-json (todos-url id) {:form-params todo}))

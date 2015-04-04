@@ -60,7 +60,7 @@
     (facts "adds a todo"
 
       (fact "successfully"
-        (let [response (post-todo "fourth")
+        (let [response (post-todo {:task "fourth"})
               expected-id 4  
               expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"} {:id expected-id :task "fourth"}]]
           (:status response) => 201
@@ -68,10 +68,15 @@
           (:body response) => {:id expected-id :task "fourth"}
           (:body (get-todos)) => expected-todos))
 
-      (fact "adding without a body returns 400"
-        (let [response (post-todo)]
+      (fact "with 400 error when no body"
+        (let [response (post-invalid-todo {})]
           (:status response) => 400 
-          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"})))
+          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
+      
+      (fact "with 422 error when task is empty"
+        (let [response (post-invalid-todo {:task " \t\n "})]
+          (:status response) => 422 
+          (:body response) => {:code "task-empty" :message "Empty task"})))
 
     (facts "deletes a todo" 
 

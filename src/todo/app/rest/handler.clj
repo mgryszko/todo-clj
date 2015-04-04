@@ -22,11 +22,12 @@
   (-> (body-as-string ctx)
       (json/read-str :key-fn keyword)))
 
+(def ^{:private true} fixed-representation {:representation {:media-type "application/json"}}) 
+
 (defn- parse-json [ctx]
   (try 
     [false {::data (body-as-json ctx)}]
-    (catch Exception e [true {:representation {:media-type "application/json"}
-                              ::validation-result [:json-malformed]}])))
+    (catch Exception e [true (assoc fixed-representation ::validation-result [:json-malformed])])))
 
 (defn- todo-location [{:keys [request] {:keys [id]} ::todo}]
   (URL. (format "%s://%s:%s%s/%d"
@@ -36,8 +37,14 @@
                 (:uri request)
                 id)))
 
-(defn- add [{data ::data}]
-  (let [todo (core/add-todo repo/add-todo! (:task data))]
+(defn- add-processable? [{{task :task} ::data :as all}]
+  (let [validation-result (core/can-todo-be-added? task)]
+     (if (valid? validation-result)
+       [true {::task task}]
+       [false {::validation-result validation-result}])))
+
+(defn- add [{task ::task}]
+  (let [todo (core/add-todo repo/add-todo! task)]
     {::todo todo}))
 
 (defn- update-processable? [{data ::data} string-id]
@@ -75,6 +82,8 @@
                               :available-media-types ["application/json"]
                               :malformed? parse-json
                               :handle-malformed error-entity
+                              :processable? add-processable?
+                              :handle-unprocessable-entity error-entity
                               :post! add
                               :location todo-location
                               :handle-created ::todo))
@@ -91,7 +100,7 @@
                                    :handle-ok ::todo))
 
   (DELETE "/todos/:id" [id] (resource :allowed-methods [:delete]
-                                      :malformed? [false {:representation {:media-type "application/json"}}] 
+                                      :malformed? [false fixed-representation] 
                                       :processable? (fn [_] (delete-processable? id))
                                       :handle-unprocessable-entity error-entity
                                       :delete! delete)))
