@@ -5,14 +5,13 @@
 (defn- location [response]
   (get-in response [:headers :location]))
 
-(defn- body-as-json [response]
-  (let [body (:body response)]
-    (if (string? body)
-      (json/read-str body :key-fn keyword) 
-      body)))
+(defn- body-as-json [{:keys [body]}]
+  (if (string? body)
+    (json/read-str body :key-fn keyword) 
+    body))
 
-(defn- send-json [method url req]
-  (let [response (method url (merge {:content-type :json :as :json} (first req)))]
+(defn- send-json [method url [req]]
+  (let [response (method url (merge {:content-type :json :as :json} req))]
     {:status (:status response)
      :body (body-as-json response)
      :location (location response)}))
@@ -47,8 +46,8 @@
   ([task] (post-json (todos-url) {:form-params {:task task}}))
   ([] (post-json (todos-url) {:throw-exceptions false})))
 
-(defn put-todo [todo]
-  (put-json (todos-url (:id todo)) {:form-params todo}))
+(defn put-todo [{:keys [id] :as todo}]
+  (put-json (todos-url id) {:form-params todo}))
 
 (defn put-invalid-todo [{:keys [id] :as todo}]
   (let [rest (dissoc todo :id)
