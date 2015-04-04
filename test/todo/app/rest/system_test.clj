@@ -79,5 +79,15 @@
         (let [response (delete-todo 1)
               expected-todos [{:id 1 :task "second"} {:id 2 :task "third"}]]
           (:status response) => 204
-          (:body (get-todos)) => expected-todos)))))
+          (:body (get-todos)) => expected-todos))
+      
+      (fact "with 422 error when todo id doesn't exist"
+        (let [response (delete-invalid-todo 100)]
+          (:status response) => 422
+          (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
+
+      (fact "with 422 error when todo id is non-numeric"
+        (let [response (delete-invalid-todo "one")]
+          (:status response) => 422
+          (:body response) => {:code "id-not-found" :message "No todo with number one"})))))
 

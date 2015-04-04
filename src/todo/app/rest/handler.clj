@@ -50,9 +50,15 @@
 (defn- update [{todo ::todo}]
   {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)})
 
-(defn- delete [ctx string-id]
-  (let [id (parse/->int string-id)]
-    (core/delete-todo repo/line-num-exists? repo/delete-todo! id)))
+(defn- delete-processable? [string-id]
+  (let [id (parse/->int string-id)
+        validation-result (core/can-todo-be-deleted? repo/line-num-exists? id)]
+    (if (valid? validation-result)
+      [true {::id id}]
+      [false {::validation-result validation-result}])))
+
+(defn- delete [{id ::id}]
+  (core/delete-todo repo/line-num-exists? repo/delete-todo! id))
 
 (defn- error-entity [{[code args] ::validation-result}]
   {:code code
@@ -85,7 +91,10 @@
                                    :handle-ok ::todo))
 
   (DELETE "/todos/:id" [id] (resource :allowed-methods [:delete]
-                                      :delete! (fn [ctx] (delete ctx id)))))
+                                      :malformed? [false {:representation {:media-type "application/json"}}] 
+                                      :processable? (fn [_] (delete-processable? id))
+                                      :handle-unprocessable-entity error-entity
+                                      :delete! delete)))
 
 (def handler 
   (-> app wrap-params))

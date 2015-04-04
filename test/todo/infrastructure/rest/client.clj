@@ -58,3 +58,6 @@
 (defn delete-todo [id]
   (delete-json (todos-url id)))
 
+(defn delete-invalid-todo [id]
+  (delete-json (todos-url id) {:throw-exceptions false}))
+
