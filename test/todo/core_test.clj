@@ -16,8 +16,8 @@
       (fact "empty todo cannot be added"
         (can-todo-be-added? any-task) => [:ok]
         (can-todo-be-added? any-short-task) => [:ok]
-        (can-todo-be-added? empty-task) => [:task_empty]
-        (can-todo-be-added? blank-task) => [:task_empty])
+        (can-todo-be-added? empty-task) => [:task-empty]
+        (can-todo-be-added? blank-task) => [:task-empty])
 
       (fact "if still tried to be added, an exception is thrown"
         (add-todo save-todo! empty-task) => (throws IllegalArgumentException))
@@ -38,11 +38,11 @@
         (against-background (id-exists? existing-id) => true)
         (can-todo-be-updated? id-exists? any-persistent-todo) => [:ok]
         (can-todo-be-updated? id-exists? (assoc-in any-persistent-todo [:task] any-short-task)) => [:ok]
-        (can-todo-be-updated? id-exists? (assoc-in any-persistent-todo [:task] empty-task)) => [:task_empty]
-        (can-todo-be-updated? id-exists? (assoc-in any-persistent-todo [:task] blank-task)) => [:task_empty])
+        (can-todo-be-updated? id-exists? (assoc-in any-persistent-todo [:task] empty-task)) => [:task-empty]
+        (can-todo-be-updated? id-exists? (assoc-in any-persistent-todo [:task] blank-task)) => [:task-empty])
 
       (fact "non-existing todo id cannot be updated"
-         (can-todo-be-updated? id-exists? {:id non-existing-id :task any-task}) => [:id_not_found non-existing-id]
+         (can-todo-be-updated? id-exists? {:id non-existing-id :task any-task}) => [:id-not-found non-existing-id]
            (provided (id-exists? non-existing-id) => false))
 
       (fact "if still tried to be updated, an exception is thrown"
@@ -58,11 +58,11 @@
             (delete-todo! existing-id) => any-persistent-todo :times 1))
       
       (fact "todo without an id cannot be deleted"
-        (can-todo-be-deleted? id-exists? nil) => [:id_mandatory]
-        (can-todo-be-deleted? id-exists? false) => [:id_mandatory])
+        (can-todo-be-deleted? id-exists? nil) => [:id-mandatory]
+        (can-todo-be-deleted? id-exists? false) => [:id-mandatory])
 
       (fact "non-existing todo id cannot be deleted"
-        (can-todo-be-deleted? id-exists? non-existing-id) => [:id_not_found non-existing-id]
+        (can-todo-be-deleted? id-exists? non-existing-id) => [:id-not-found non-existing-id]
           (provided (id-exists? non-existing-id) => false))
 
       (fact "if still tried to be deleted, an exception is thrown"

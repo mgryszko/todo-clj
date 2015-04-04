@@ -45,17 +45,17 @@
       (fact "with 422 error when todo id doesn't exist"
         (let [response (put-invalid-todo {:id 100 :task "updated"})]
           (:status response) => 422
-          (:body response) => {:code "id_not_found" :message "No todo with number 100"}))
+          (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
 
       (fact "with 422 error when todo id is non-numeric"
         (let [response (put-invalid-todo {:id "one" :task "updated"})]
           (:status response) => 422
-          (:body response) => {:code "id_not_found" :message "No todo with number one"}))
+          (:body response) => {:code "id-not-found" :message "No todo with number one"}))
 
       (fact "with 422 error when task is empty"
         (let [response (put-invalid-todo {:id 1 :task " \t\n "})]
           (:status response) => 422
-          (:body response) => {:code "task_empty" :message "Empty task"})))
+          (:body response) => {:code "task-empty" :message "Empty task"})))
 
     (facts "adds a todo"
 
