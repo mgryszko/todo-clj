@@ -5,12 +5,20 @@
             [todo.infrastructure.file.test-operations :refer [delete-todo-file]]
             [todo.infrastructure.rest.client :refer :all]))
 
+(def empty-task " \t\n\r ")
+(def existing-id 1)
+(def non-existing-id 100)
+(def non-numeric-id "one")
+
+(defn add-initial-todos []
+  (add-todo! {:task "first"})
+  (add-todo! {:task "second"})
+  (add-todo! {:task "third"}))
+
 (against-background [(before :contents (start-server port)
                              :after (stop-server))
                      (before :facts [(delete-todo-file)
-                                     (add-todo! {:task "first"})
-                                     (add-todo! {:task "second"})
-                                     (add-todo! {:task "third"})]
+                                     (add-initial-todos)]
                              :after (delete-todo-file))]
   (facts "todo application"
 
@@ -22,38 +30,36 @@
             (:body response) => expected-todos))
        
         (fact "single"
-          (let [id 1
-                response (get-todo id)]
+          (let [response (get-todo existing-id)]
             (:status response) => 200
-            (:body response) => {:id id :task "first"})))
+            (:body response) => {:id existing-id :task "first"})))
 
     (facts "updates a todo"
 
       (fact "successfully"
-        (let [id 1
-              response (put-todo {:id id :task "first updated"})
-              expected-todos [{:id 1 :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
+        (let [response (put-todo {:id existing-id :task "first updated"})
+              expected-todos [{:id existing-id :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
         (:status response) => 200
-        (:body response) => {:id id :task "first updated"}
+        (:body response) => {:id existing-id :task "first updated"}
         (:body (get-todos)) => expected-todos)) 
 
       (fact "with 400 error when no body"
-        (let [response (put-invalid-todo {:id 1})]
+        (let [response (put-invalid-todo {:id existing-id})]
           (:status response) => 400 
           (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
       
       (fact "with 422 error when todo id doesn't exist"
-        (let [response (put-invalid-todo {:id 100 :task "updated"})]
+        (let [response (put-invalid-todo {:id non-existing-id :task "updated"})]
           (:status response) => 422
           (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
 
       (fact "with 422 error when todo id is non-numeric"
-        (let [response (put-invalid-todo {:id "one" :task "updated"})]
+        (let [response (put-invalid-todo {:id non-numeric-id :task "updated"})]
           (:status response) => 422
           (:body response) => {:code "id-not-found" :message "No todo with number one"}))
 
       (fact "with 422 error when task is empty"
-        (let [response (put-invalid-todo {:id 1 :task " \t\n "})]
+        (let [response (put-invalid-todo {:id existing-id :task empty-task})]
           (:status response) => 422
           (:body response) => {:code "task-empty" :message "Empty task"})))
 
@@ -74,25 +80,25 @@
           (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
       
       (fact "with 422 error when task is empty"
-        (let [response (post-invalid-todo {:task " \t\n "})]
+        (let [response (post-invalid-todo {:task empty-task})]
           (:status response) => 422 
           (:body response) => {:code "task-empty" :message "Empty task"})))
 
     (facts "deletes a todo" 
 
       (fact "successfully"
-        (let [response (delete-todo 1)
+        (let [response (delete-todo existing-id)
               expected-todos [{:id 1 :task "second"} {:id 2 :task "third"}]]
           (:status response) => 204
           (:body (get-todos)) => expected-todos))
       
       (fact "with 422 error when todo id doesn't exist"
-        (let [response (delete-invalid-todo 100)]
+        (let [response (delete-invalid-todo non-existing-id)]
           (:status response) => 422
           (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
 
       (fact "with 422 error when todo id is non-numeric"
-        (let [response (delete-invalid-todo "one")]
+        (let [response (delete-invalid-todo non-numeric-id)]
           (:status response) => 422
           (:body response) => {:code "id-not-found" :message "No todo with number one"})))))
 
