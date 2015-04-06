@@ -12,8 +12,10 @@
 (defn- find-all [_]
   (core/find-all-todos repo/find-all))
 
-(defn- find-by-id [string-id]
-  (core/find-todo-by-id repo/find-by-line-number (parse/->int string-id)))
+(defn- todo-exists? [string-id]
+  (if-let [todo (core/find-todo-by-id repo/find-by-line-number (parse/->int string-id))]
+    {::todo todo}
+    [false {::validation-result [:id-not-found string-id]}]))
 
 (defn- body-as-string [{{:keys [body]} :request}]
   (slurp (clojure.java.io/reader body)))
@@ -76,7 +78,10 @@
                              :handle-ok find-all))
 
   (GET "/todos/:id" [id] (resource :available-media-types ["application/json"]
-                                   :handle-ok (fn [_] (find-by-id id))))
+                                   :malformed? [false fixed-representation] 
+                                   :exists? (fn [_] (todo-exists? id)) 
+                                   :handle-not-found error-entity
+                                   :handle-ok ::todo))
 
   (POST "/todos" [] (resource :allowed-methods [:post]
                               :available-media-types ["application/json"]

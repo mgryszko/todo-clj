@@ -42,6 +42,9 @@
 (defn get-todo [id]
   (get-json (todos-url id)))
 
+(defn get-invalid-todo [id]
+  (get-json (todos-url id) {:throw-exceptions false}))
+
 (defn post-todo 
   ([todo] (post-json (todos-url) {:form-params todo})))
 

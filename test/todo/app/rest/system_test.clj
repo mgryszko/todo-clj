@@ -13,6 +13,7 @@
 (def created 201)
 (def no-content 204)
 (def bad-request 400)
+(def not-found 404)
 (def unprocessable-entity 422)
 
 (defn add-initial-todos []
@@ -31,20 +32,25 @@
        (fact "all"
           (let [response (get-todos)
                 expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]]
-            (:status response) => OK
+            (:status response) => ok
             (:body response) => expected-todos))
        
         (fact "single"
           (let [response (get-todo existing-id)]
-            (:status response) => OK
-            (:body response) => {:id existing-id :task "first"})))
+            (:status response) => ok
+            (:body response) => {:id existing-id :task "first"}))
+
+        (fact "with 404 error when todo id doesn't exist"
+          (let [response (get-invalid-todo non-existing-id)]
+            (:status response) => not-found
+            (:body response) => {:code "id-not-found" :message "No todo with number 100"})))
 
     (facts "updates a todo"
 
       (fact "successfully"
         (let [response (put-todo {:id existing-id :task "first updated"})
               expected-todos [{:id existing-id :task "first updated"} {:id 2 :task "second"} {:id 3 :task "third"}]]
-        (:status response) => OK
+        (:status response) => ok
         (:body response) => {:id existing-id :task "first updated"}
         (:body (get-todos)) => expected-todos)) 
 
