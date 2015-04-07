@@ -35,7 +35,7 @@
             (:status response) => ok
             (:body response) => expected-todos))
        
-        (fact "single"
+        (fact "single by id"
           (let [response (get-todo existing-id)]
             (:status response) => ok
             (:body response) => {:id existing-id :task "first"}))
@@ -59,14 +59,14 @@
           (:status response) => bad-request
           (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
       
-      (fact "with 422 error when todo id doesn't exist"
+      (fact "with 404 error when todo id doesn't exist"
         (let [response (put-invalid-todo {:id non-existing-id :task "updated"})]
-          (:status response) => unprocessable-entity
+          (:status response) => not-found
           (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
 
-      (fact "with 422 error when todo id is non-numeric"
+      (fact "with 404 error when todo id is non-numeric"
         (let [response (put-invalid-todo {:id non-numeric-id :task "updated"})]
-          (:status response) => unprocessable-entity
+          (:status response) => not-found
           (:body response) => {:code "id-not-found" :message "No todo with number one"}))
 
       (fact "with 422 error when task is empty"

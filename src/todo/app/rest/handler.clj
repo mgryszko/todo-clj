@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [compojure.core :refer [defroutes GET POST PUT DELETE]] 
             [liberator.core :refer [resource]]
+            [liberator.representation :refer [as-response ring-response]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.app.rest.validation :refer :all]
             [todo.core :as core]
@@ -26,10 +27,14 @@
 
 (def ^{:private true} fixed-representation {:representation {:media-type "application/json"}}) 
 
+(defn- error-entity [{[code args] ::validation-result}]
+  {:code code
+   :message (format-message code args)})
+
 (defn- parse-json [ctx]
   (try 
     [false {::data (body-as-json ctx)}]
-    (catch Exception e [true (assoc fixed-representation ::validation-result [:json-malformed])])))
+    (catch Exception _ (assoc fixed-representation ::validation-result [:json-malformed]))))
 
 (defn- todo-location [{:keys [request] {:keys [id]} ::todo}]
   (URL. (format "%s://%s:%s%s/%d"
@@ -42,7 +47,7 @@
 (defn- add-processable? [{{task :task} ::data :as all}]
   (let [validation-result (core/can-todo-be-added? task)]
      (if (valid? validation-result)
-       [true {::task task}]
+       {::task task}
        [false {::validation-result validation-result}])))
 
 (defn- add [{task ::task}]
@@ -52,26 +57,30 @@
 (defn- update-processable? [{data ::data} string-id]
   (let [todo (assoc data :id (parse/->int string-id))
         validation-result (core/can-todo-be-updated? repo/line-num-exists? todo)]
-     (if (valid? validation-result)
-       [true {::todo todo}]
+     (if (ok-or-not-found? validation-result)
+       {::todo todo ::validation-result validation-result}
        [false {::validation-result validation-result}])))
 
 (defn- update [{todo ::todo}]
   {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)})
 
+(defn- update-exists? [{validation-result ::validation-result}]
+    (found? validation-result))
+
+(defn- update-change-501-to-404 [ctx]
+   (-> (as-response (error-entity ctx) ctx)
+     (assoc :status 404)
+     (ring-response)))
+
 (defn- delete-processable? [string-id]
   (let [id (parse/->int string-id)
         validation-result (core/can-todo-be-deleted? repo/line-num-exists? id)]
     (if (valid? validation-result)
-      [true {::id id}]
+      {::id id}
       [false {::validation-result validation-result}])))
 
 (defn- delete [{id ::id}]
   (core/delete-todo repo/line-num-exists? repo/delete-todo! id))
-
-(defn- error-entity [{[code args] ::validation-result}]
-  {:code code
-   :message (format-message code args)})
 
 (defroutes app
   (GET "/todos" [] (resource :available-media-types ["application/json"]
@@ -99,6 +108,9 @@
                                    :handle-malformed error-entity
                                    :processable? (fn [ctx] (update-processable? ctx id))
                                    :handle-unprocessable-entity error-entity
+                                   :exists? update-exists?
+                                   :can-put-to-missing? false
+                                   :handle-not-implemented update-change-501-to-404
                                    :put! update
                                    :new? false
                                    :respond-with-entity? true
