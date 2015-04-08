@@ -9,24 +9,24 @@
             [todo.infrastructure.parse :as parse])
   (:import [java.net URL]))
 
-(defn- find-all [_]
-  (core/find-all-todos repo/find-all))
+(def ^{:private true} json-representation {:representation {:media-type "application/json"}}) 
 
-(defn- todo-exists? [string-id]
-  (if-let [todo (core/find-todo-by-id repo/find-by-line-number (parse/->int string-id))]
-    {::todo todo}
-    [false {::validation-result [:id-not-found string-id]}]))
-
-(def ^{:private true} fixed-representation {:representation {:media-type "application/json"}}) 
+(defn- parse-json [ctx]
+  (try 
+    [false {::data (body-as-json ctx)}]
+    (catch Exception _ (assoc json-representation ::validation-result [:json-malformed]))))
 
 (defn- error-entity [{[code args] ::validation-result}]
   {:code code
    :message (format-message code args)})
 
-(defn- parse-json [ctx]
-  (try 
-    [false {::data (body-as-json ctx)}]
-    (catch Exception _ (assoc fixed-representation ::validation-result [:json-malformed]))))
+(defn- find-all [_]
+  (core/find-all-todos repo/find-all))
+
+(defn- find-by-id [string-id]
+  (if-let [todo (core/find-todo-by-id repo/find-by-line-number (parse/->int string-id))]
+    {::todo todo}
+    [false {::validation-result [:id-not-found string-id]}]))
 
 (defn- todo-location [{:keys [request] {:keys [id]} ::todo}]
   (URL. (format "%s://%s:%s%s/%d"
@@ -43,8 +43,7 @@
        [false {::validation-result validation-result}])))
 
 (defn- add [{task ::task}]
-  (let [todo (core/add-todo repo/add-todo! task)]
-    {::todo todo}))
+  {::todo (core/add-todo repo/add-todo! task)})
 
 (defn- update-processable? [{data ::data} string-id]
   (let [todo (assoc data :id (parse/->int string-id))
@@ -53,11 +52,11 @@
        {::todo todo ::validation-result validation-result}
        [false {::validation-result validation-result}])))
 
-(defn- update [{todo ::todo}]
-  {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)})
-
 (defn- update-exists? [{validation-result ::validation-result}]
     (found? validation-result))
+
+(defn- update [{todo ::todo}]
+  {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)})
 
 (defn- update-change-501-to-404 [ctx]
    (-> (as-response (error-entity ctx) ctx)
@@ -80,8 +79,8 @@
 
 (defresource get-todo [id]
   :available-media-types ["application/json"]
-  :malformed? [false fixed-representation] 
-  :exists? (fn [_] (todo-exists? id)) 
+  :malformed? [false json-representation] 
+  :exists? (fn [_] (find-by-id id)) 
   :handle-not-found error-entity
   :handle-ok ::todo)
 
@@ -113,7 +112,7 @@
 
 (defresource delete-todo [id]
   :allowed-methods [:delete]
-  :malformed? [false fixed-representation] 
+  :malformed? [false json-representation] 
   :exists? (fn [_] (delete-processable? id)) 
   :handle-not-found error-entity
   :delete! delete)
