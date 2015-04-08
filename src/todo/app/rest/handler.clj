@@ -1,7 +1,7 @@
 (ns todo.app.rest.handler
   (:require [clojure.data.json :as json]
             [compojure.core :refer [defroutes GET POST PUT DELETE]] 
-            [liberator.core :refer [resource]]
+            [liberator.core :refer [defresource resource]]
             [liberator.representation :refer [as-response ring-response]]
             [ring.middleware.params :refer [wrap-params]]
             [todo.app.rest.validation :refer :all]
@@ -82,45 +82,56 @@
 (defn- delete [{id ::id}]
   (core/delete-todo repo/line-num-exists? repo/delete-todo! id))
 
+(defresource get-todos
+  :available-media-types ["application/json"]
+  :handle-ok find-all)
+
+(defresource get-todo [id]
+  :available-media-types ["application/json"]
+  :malformed? [false fixed-representation] 
+  :exists? (fn [_] (todo-exists? id)) 
+  :handle-not-found error-entity
+  :handle-ok ::todo)
+
+(defresource post-todo
+  :allowed-methods [:post]
+  :available-media-types ["application/json"]
+  :malformed? parse-json
+  :handle-malformed error-entity
+  :processable? add-processable?
+  :handle-unprocessable-entity error-entity
+  :post! add
+  :location todo-location
+  :handle-created ::todo)
+
+(defresource put-todo [id]
+  :allowed-methods [:put]
+  :available-media-types ["application/json"]
+  :malformed? parse-json
+  :handle-malformed error-entity
+  :processable? (fn [ctx] (update-processable? ctx id))
+  :handle-unprocessable-entity error-entity
+  :exists? update-exists?
+  :can-put-to-missing? false
+  :handle-not-implemented update-change-501-to-404
+  :put! update
+  :new? false
+  :respond-with-entity? true
+  :handle-ok ::todo)
+
+(defresource delete-todo [id]
+  :allowed-methods [:delete]
+  :malformed? [false fixed-representation] 
+  :exists? (fn [_] (delete-processable? id)) 
+  :handle-not-found error-entity
+  :delete! delete)
+
 (defroutes app
-  (GET "/todos" [] (resource :available-media-types ["application/json"]
-                             :handle-ok find-all))
-
-  (GET "/todos/:id" [id] (resource :available-media-types ["application/json"]
-                                   :malformed? [false fixed-representation] 
-                                   :exists? (fn [_] (todo-exists? id)) 
-                                   :handle-not-found error-entity
-                                   :handle-ok ::todo))
-
-  (POST "/todos" [] (resource :allowed-methods [:post]
-                              :available-media-types ["application/json"]
-                              :malformed? parse-json
-                              :handle-malformed error-entity
-                              :processable? add-processable?
-                              :handle-unprocessable-entity error-entity
-                              :post! add
-                              :location todo-location
-                              :handle-created ::todo))
-
-  (PUT "/todos/:id" [id] (resource :allowed-methods [:put]
-                                   :available-media-types ["application/json"]
-                                   :malformed? parse-json
-                                   :handle-malformed error-entity
-                                   :processable? (fn [ctx] (update-processable? ctx id))
-                                   :handle-unprocessable-entity error-entity
-                                   :exists? update-exists?
-                                   :can-put-to-missing? false
-                                   :handle-not-implemented update-change-501-to-404
-                                   :put! update
-                                   :new? false
-                                   :respond-with-entity? true
-                                   :handle-ok ::todo))
-
-  (DELETE "/todos/:id" [id] (resource :allowed-methods [:delete]
-                                      :malformed? [false fixed-representation] 
-                                      :exists? (fn [_] (delete-processable? id)) 
-                                      :handle-not-found error-entity
-                                      :delete! delete)))
+  (GET "/todos" [] get-todos)
+  (GET "/todos/:id" [id] (get-todo id))
+  (POST "/todos" [] post-todo)
+  (PUT "/todos/:id" [id] (put-todo id))
+  (DELETE "/todos/:id" [id] (delete-todo id)))
 
 (def handler 
   (-> app wrap-params))
