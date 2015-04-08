@@ -1,8 +1,7 @@
 (ns todo.app.rest.validation)
 
 (defn valid? [[code]] (= code :ok))
-(defn ok-or-not-found? [[code]] (or (= code :ok) (= code :id-not-found)))
-(defn found? [[code]] (= code :ok))
+(defn not-found? [[code]] (= code :id-not-found))
 
 (def ^{:private true} messages
   {:json-malformed "Unparseable JSON in body"
