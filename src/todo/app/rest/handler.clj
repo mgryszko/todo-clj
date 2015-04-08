@@ -118,8 +118,8 @@
 
   (DELETE "/todos/:id" [id] (resource :allowed-methods [:delete]
                                       :malformed? [false fixed-representation] 
-                                      :processable? (fn [_] (delete-processable? id))
-                                      :handle-unprocessable-entity error-entity
+                                      :exists? (fn [_] (delete-processable? id)) 
+                                      :handle-not-found error-entity
                                       :delete! delete)))
 
 (def handler 

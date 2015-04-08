@@ -48,7 +48,7 @@
         (delete-todo! line-num) =>
           (every-checker (file-saved ["first" "third" "fourth"])
                          {:id line-num :task "second"})))
-
+    
     (fact "deletes last todo"
       (let [line-num 4]
         (delete-todo! line-num) =>

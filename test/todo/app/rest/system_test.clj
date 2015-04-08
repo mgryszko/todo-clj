@@ -103,13 +103,13 @@
           (:status response) => no-content
           (:body (get-todos)) => expected-todos))
       
-      (fact "with 422 error when todo id doesn't exist"
+      (fact "with 404 error when todo id doesn't exist"
         (let [response (delete-invalid-todo non-existing-id)]
-          (:status response) => unprocessable-entity
+          (:status response) => not-found
           (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
 
-      (fact "with 422 error when todo id is non-numeric"
+      (fact "with 404 error when todo id is non-numeric"
         (let [response (delete-invalid-todo non-numeric-id)]
-          (:status response) => unprocessable-entity
+          (:status response) => not-found
           (:body response) => {:code "id-not-found" :message "No todo with number one"})))))
 
