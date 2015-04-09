@@ -15,6 +15,9 @@
 (def bad-request 400)
 (def not-found 404)
 (def unprocessable-entity 422)
+(def json-malformed-entity {:code "json-malformed" :message "Unparseable JSON in body"})
+(defn id-not-found-entity [id] {:code "id-not-found" :message (format "No todo with number %s" id)})
+(def task-empty-entity {:code "task-empty" :message "Empty task"})
 
 (defn add-initial-todos []
   (add-todo! {:task "first"})
@@ -43,7 +46,7 @@
         (fact "with 404 error when todo id doesn't exist"
           (let [response (get-invalid-todo non-existing-id)]
             (:status response) => not-found
-            (:body response) => {:code "id-not-found" :message "No todo with number 100"})))
+            (:body response) => (id-not-found-entity non-existing-id))))
 
     (facts "updates a todo"
 
@@ -57,22 +60,22 @@
       (fact "with 400 error when no body"
         (let [response (put-invalid-todo {:id existing-id})]
           (:status response) => bad-request
-          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
+          (:body response) => json-malformed-entity))
       
       (fact "with 404 error when todo id doesn't exist"
         (let [response (put-invalid-todo {:id non-existing-id :task "updated"})]
           (:status response) => not-found
-          (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
+          (:body response) => (id-not-found-entity non-existing-id)))
 
       (fact "with 404 error when todo id is non-numeric"
         (let [response (put-invalid-todo {:id non-numeric-id :task "updated"})]
           (:status response) => not-found
-          (:body response) => {:code "id-not-found" :message "No todo with number one"}))
+          (:body response) => (id-not-found-entity non-numeric-id)))
 
       (fact "with 422 error when task is empty"
         (let [response (put-invalid-todo {:id existing-id :task empty-task})]
           (:status response) => unprocessable-entity
-          (:body response) => {:code "task-empty" :message "Empty task"})))
+          (:body response) => task-empty-entity)))
 
     (facts "adds a todo"
 
@@ -88,12 +91,12 @@
       (fact "with 400 error when no body"
         (let [response (post-invalid-todo {})]
           (:status response) => bad-request
-          (:body response) => {:code "json-malformed" :message "Unparseable JSON in body"}))
+          (:body response) => json-malformed-entity))
       
       (fact "with 422 error when task is empty"
         (let [response (post-invalid-todo {:task empty-task})]
           (:status response) => unprocessable-entity
-          (:body response) => {:code "task-empty" :message "Empty task"})))
+          (:body response) => task-empty-entity)))
 
     (facts "deletes a todo" 
 
@@ -106,10 +109,10 @@
       (fact "with 404 error when todo id doesn't exist"
         (let [response (delete-invalid-todo non-existing-id)]
           (:status response) => not-found
-          (:body response) => {:code "id-not-found" :message "No todo with number 100"}))
+          (:body response) => (id-not-found-entity non-existing-id)))
 
       (fact "with 404 error when todo id is non-numeric"
         (let [response (delete-invalid-todo non-numeric-id)]
           (:status response) => not-found
-          (:body response) => {:code "id-not-found" :message "No todo with number one"})))))
+          (:body response) => (id-not-found-entity non-numeric-id))))))
 
