@@ -16,6 +16,12 @@
     [false {::data (body-as-json ctx)}]
     (catch Exception _ (assoc json-representation ::validation-result [:json-malformed]))))
 
+(defmacro if-valid? [validate-fn on-success]
+  `(let [validation-result# ~validate-fn] 
+    (if (valid? validation-result#)
+      ~on-success
+      [false {::validation-result validation-result#}])))
+
 (defn- error-entity [{[code args] ::validation-result}]
   {:code code
    :message (format-message code args)})
@@ -34,10 +40,8 @@
     [false {::validation-result [:id-not-found string-id]}]))
 
 (defn- add-processable? [{{task :task} ::data :as all}]
-  (let [validation-result (core/can-todo-be-added? task)]
-     (if (valid? validation-result)
-       {::task task}
-       [false {::validation-result validation-result}])))
+  (if-valid? (core/can-todo-be-added? task)
+    {::task task}))
 
 (defn- add [{task ::task}]
   {::todo (core/add-todo repo/add-todo! task)})
@@ -51,11 +55,9 @@
                 id)))
 
 (defn- update-processable? [{data ::data} string-id]
-  (let [todo (assoc data :id (parse/->int string-id))
-        validation-result (core/can-todo-be-updated? repo/line-num-exists? todo)]
-     (if (valid? validation-result)
-       {::todo todo}
-       [false {::validation-result validation-result}])))
+  (let [todo (assoc data :id (parse/->int string-id))]
+     (if-valid? (core/can-todo-be-updated? repo/line-num-exists? todo)
+       {::todo todo})))
 
 (defn- update [{todo ::todo}]
   {::todo (core/update-todo repo/line-num-exists? repo/update-todo! todo)})
@@ -66,11 +68,9 @@
     (error-entity ctx)))
 
 (defn- delete-processable? [string-id]
-  (let [id (parse/->int string-id)
-        validation-result (core/can-todo-be-deleted? repo/line-num-exists? id)]
-    (if (valid? validation-result)
-      {::id id}
-      [false {::validation-result validation-result}])))
+  (let [id (parse/->int string-id)]
+    (if-valid? (core/can-todo-be-deleted? repo/line-num-exists? id)
+      {::id id})))
 
 (defn- delete [{id ::id}]
   (core/delete-todo repo/line-num-exists? repo/delete-todo! id))
