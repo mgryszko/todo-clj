@@ -14,12 +14,19 @@
 (defn add-initial-todos []
   (add-silently "first" "second" "third"))
 
+(def empty-task " \t\n\r ")
+(def non-existing-id 100)
+(def non-numeric-id "one")
+
+(defn not-found-msg [id] (format "No todo with number %s!" id))
+(def empty-task-msg "Empty task!")
+
 (defn list-todos []
   (str/split-lines (with-main "list")))
 
 (against-background [(before :facts [(delete-todo-file)
-                                     (add-initial-todos)])
-                     (after :facts (delete-todo-file))]
+                                     (add-initial-todos)]
+                             :after (delete-todo-file))]
   (facts "todo application"
 
     (fact "lists todos"
@@ -33,13 +40,13 @@
         (list-todos) => ["1 first updated" "2 second" "3 third updated"])
 
       (fact "rejecting  with a nonexisting todo id"
-        (with-main "update" 4) => "No todo with number 4!")
+        (with-main "update" non-existing-id) => (not-found-msg non-existing-id))
 
       (fact "rejecting with a non-numeric todo id"
-        (with-main "update" "one") => "No todo with number one!")
+        (with-main "update" non-numeric-id) => (not-found-msg non-numeric-id))
       
       (fact "rejecting without a task"
-        (with-main "update" 1 " \t\n ") => "Empty task!")
+        (with-main "update" 1 empty-task) => empty-task-msg)
       
       (fact "successfully with todo id passed as string"
         (with-main "update" "1" "updated") => truthy))
@@ -51,9 +58,8 @@
         (list-todos) => ["1 first" "2 second" "3 third" "4 fourth"])    
 
       (fact "rejecting without a task"
-          (let [expected-message "Empty task!"]
-            (with-main "add") => expected-message 
-            (with-main "add" "") => expected-message)))
+        (with-main "add") => empty-task-msg
+        (with-main "add" empty-task) => empty-task-msg))
 
     (facts "deletes a todo"
 
@@ -62,15 +68,15 @@
         (list-todos) => ["1 first" "2 third"])
 
       (fact "rejecting with a nonexisting todo id"
-        (with-main "delete" 4) => "No todo with number 4!")
+        (with-main "delete" non-existing-id) => (not-found-msg non-existing-id))
 
       (fact "rejecting with a non-numeric todo id"
-        (with-main "delete" "two") => "No todo with number two!")
+        (with-main "delete" non-numeric-id) => (not-found-msg non-numeric-id))
       
       (fact "rejecting without the todo id"
         (with-main "delete") => "No todo number given!")
 
-      (fact "successfully with todo di passed as string"
+      (fact "successfully with todo id passed as string"
         (with-main "delete" "1") => truthy))
     
     (fact "prints usage on unknown action"

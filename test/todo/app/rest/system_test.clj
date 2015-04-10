@@ -5,16 +5,18 @@
             [todo.infrastructure.file.test-operations :refer [delete-todo-file]]
             [todo.infrastructure.rest.client :refer :all]))
 
-(def empty-task " \t\n\r ")
 (def existing-id 1)
 (def non-existing-id 100)
 (def non-numeric-id "one")
+(def empty-task " \t\n\r ")
+
 (def ok 200)
 (def created 201)
 (def no-content 204)
 (def bad-request 400)
 (def not-found 404)
 (def unprocessable-entity 422)
+
 (def json-malformed-entity {:code "json-malformed" :message "Unparseable JSON in body"})
 (defn id-not-found-entity [id] {:code "id-not-found" :message (format "No todo with number %s" id)})
 (def task-empty-entity {:code "task-empty" :message "Empty task"})
