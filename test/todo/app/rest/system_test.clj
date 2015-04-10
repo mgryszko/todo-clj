@@ -32,6 +32,7 @@
   (facts "todo application"
 
     (facts "lists todos"
+
        (fact "all"
           (let [response (get-todos)
                 expected-todos [{:id 1 :task "first"} {:id 2 :task "second"} {:id 3 :task "third"}]]
