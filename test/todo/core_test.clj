@@ -4,7 +4,7 @@
 
 (declare save-todo! delete-todo! id-exists? find-todo)
 
-(facts "about todo use cases"
+(facts "todo use cases"
   (let [any-task "any task"
         any-short-task "a"
         empty-task ""
@@ -12,7 +12,7 @@
         existing-id 1
         any-persistent-todo {:id 1 :task any-task}
         non-existing-id 2]
-    (facts "about adding todo"
+    (facts "add todo"
       (fact "empty todo cannot be added"
         (can-todo-be-added? any-task) => [:ok]
         (can-todo-be-added? any-short-task) => [:ok]
@@ -27,7 +27,7 @@
           (provided
             (save-todo! {:task any-task}) => any-persistent-todo :times 1)))
 
-    (facts "about updating todo"
+    (facts "update todo"
       (fact "todo is updated"
         (against-background (id-exists? (any-persistent-todo :id)) => true)
         (update-todo id-exists? save-todo! any-persistent-todo) => any-persistent-todo
@@ -50,7 +50,7 @@
          (update-todo id-exists? save-todo! {:id non-existing-id :task any-task}) =>
            (throws IllegalArgumentException)))
 
-    (facts "about deleting todo"
+    (facts "delete todo"
       (fact "todo is deleted"
         (delete-todo id-exists? delete-todo! existing-id) => any-persistent-todo
           (provided
@@ -69,7 +69,7 @@
          (against-background (id-exists? non-existing-id) => false)
          (delete-todo id-exists? delete-todo! non-existing-id) => (throws IllegalArgumentException)))
 
-    (facts "about finding"
+    (facts "finds todos"
       (fact "all todos"
         (find-all-todos find-todo) => [any-persistent-todo]
           (provided (find-todo) => [any-persistent-todo]))

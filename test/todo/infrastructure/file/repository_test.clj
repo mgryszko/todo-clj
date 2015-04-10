@@ -9,7 +9,7 @@
 (background (before :facts (delete-todo-file))
             (after :facts (delete-todo-file)))
 
-(facts "about file repository"
+(facts "file repository"
   (fact "adds single todo"
     (add-todo! {:task "any"}) =>
       (every-checker (file-saved ["any"])
