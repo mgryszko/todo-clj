@@ -1,7 +1,7 @@
-(ns todo.app.rest.handler
+(ns todo.infrastructure.rest.handler
   (:require [compojure.core :refer [defroutes GET POST PUT DELETE]] 
             [ring.middleware.params :refer [wrap-params]]
-            [todo.app.rest.resources :refer :all]))
+            [todo.infrastructure.rest.resources :refer :all]))
 
 (defroutes app
   (GET "/todos" [] get-todos)

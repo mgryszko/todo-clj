@@ -1,8 +1,8 @@
 (ns todo.app.rest.system-test
   (:require [midje.sweet :refer :all]
-            [todo.infrastructure.rest.server :refer :all]
-            [todo.infrastructure.file.test-operations :refer [delete-todo-file]]
-            [todo.infrastructure.rest.client :refer :all]))
+            [todo.app.rest.client :refer :all]
+            [todo.app.rest.server :refer :all]
+            [todo.infrastructure.file.test-operations :refer [delete-todo-file]]))
 
 (def existing-id 1)
 (def non-existing-id 100)

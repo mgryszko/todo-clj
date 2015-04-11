@@ -1,4 +1,4 @@
-(ns todo.app.rest.json
+(ns todo.infrastructure.rest.json
   (:require [clojure.data.json :as json]))
 
 (defn- body-as-string [{{:keys [body]} :request}]

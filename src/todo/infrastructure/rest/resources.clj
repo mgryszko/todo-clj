@@ -1,12 +1,12 @@
-(ns todo.app.rest.resources
+(ns todo.infrastructure.rest.resources
   (:require [clojure.data.json :as json]
             [liberator.core :refer [defresource]]
             [liberator.representation :refer [as-response ring-response]]
-            [todo.app.rest.json :refer :all]
-            [todo.app.rest.validation :refer :all]
             [todo.core :as core]
             [todo.infrastructure.file.repository :as repo]
-            [todo.infrastructure.parse :as parse])
+            [todo.infrastructure.parse :as parse]
+            [todo.infrastructure.rest.json :refer :all]
+            [todo.infrastructure.rest.validation :refer :all])
   (:import [java.net URL]))
 
 (def ^{:private true} json-representation {:representation {:media-type "application/json"}}) 

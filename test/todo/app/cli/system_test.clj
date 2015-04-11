@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [midje.sweet :refer :all]
-            [todo.app.cli.main :refer [-main]]
+            [todo.infrastructure.cli.main :refer [-main]]
             [todo.infrastructure.file.test-operations :refer [delete-todo-file]]))
 
 (defmacro with-main [command & args]

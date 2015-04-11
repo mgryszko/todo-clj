@@ -1,6 +1,6 @@
-(ns todo.infrastructure.rest.server
+(ns todo.app.rest.server
   (:require [ring.server.standalone :as server]
-            [todo.app.rest.handler :refer [handler]]))
+            [todo.infrastructure.rest.handler :refer [handler]]))
 
 (defonce server (atom nil))
 

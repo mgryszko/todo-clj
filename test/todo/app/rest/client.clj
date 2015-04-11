@@ -1,4 +1,4 @@
-(ns todo.infrastructure.rest.client
+(ns todo.app.rest.client
   (:require [clojure.data.json :as json]
             [clj-http.client :as http]))
 

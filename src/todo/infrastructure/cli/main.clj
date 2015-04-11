@@ -1,8 +1,8 @@
-(ns todo.app.cli.main
+(ns todo.infrastructure.cli.main
   (:require [clojure.string :refer [join]]
             [clj-stacktrace.repl :as stacktrace]
-            [todo.app.cli.validation :as val]
             [todo.core :as core]
+            [todo.infrastructure.cli.validation :as val]
             [todo.infrastructure.file.repository :as repo]
             [todo.infrastructure.parse :as parse])
   (:gen-class))

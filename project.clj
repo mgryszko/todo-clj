@@ -18,6 +18,6 @@
   :repl-options {:init (do
                          (use 'midje.repl) 
                          (autotest))}
-  :main todo.app.cli.main
+  :main todo.infrastructure.cli.main
   :bin  {:name "todo" :bootclasspath true}
-  :ring {:handler todo.app.rest.handler/handler})
+  :ring {:handler todo.infrastructure.rest.handler/handler})

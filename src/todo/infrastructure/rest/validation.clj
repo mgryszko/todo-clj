@@ -1,4 +1,4 @@
-(ns todo.app.rest.validation)
+(ns todo.infrastructure.rest.validation)
 
 (defn valid? [[code]] (= code :ok))
 (defn not-found? [[code]] (= code :id-not-found))
