@@ -53,8 +53,8 @@
       list
 "))
 
-(defn- command-from-args [args]
-  (case (first args)
+(defn- command-from-args [[command]]
+  (case command
     "add" add
     "update" update
     "delete" delete 

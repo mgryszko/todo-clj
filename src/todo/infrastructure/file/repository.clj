@@ -5,9 +5,8 @@
 
 (def file-name (or (env :todo-file) "todo.txt"))
 
-(defn- modify-nth-line [lines todo]
-  (let [line-num (:id todo)] 
-     (assoc lines (- line-num 1) (:task todo))))
+(defn- modify-nth-line [lines {line-num :id task :task}]
+  (assoc lines (- line-num 1) task))
 
 (defn- delete-nth-line [lines line-num]
   (into [] (concat
