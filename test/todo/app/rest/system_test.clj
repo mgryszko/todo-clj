@@ -1,7 +1,6 @@
 (ns todo.app.rest.system-test
   (:require [midje.sweet :refer :all]
             [todo.infrastructure.rest.server :refer :all]
-            [todo.infrastructure.file.repository :refer [add-todo!]]
             [todo.infrastructure.file.test-operations :refer [delete-todo-file]]
             [todo.infrastructure.rest.client :refer :all]))
 
@@ -22,9 +21,9 @@
 (def task-empty-entity {:code "task-empty" :message "Empty task"})
 
 (defn add-initial-todos []
-  (add-todo! {:task "first"})
-  (add-todo! {:task "second"})
-  (add-todo! {:task "third"}))
+  (post-todo {:task "first"})
+  (post-todo {:task "second"})
+  (post-todo {:task "third"}))
 
 (against-background [(before :contents (start-server port)
                              :after (stop-server))
