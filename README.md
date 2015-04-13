@@ -1,6 +1,6 @@
 # Overview
 
-Yet another todo manager. Pet project developed for two reasons:
+Yet another todo manager inspired by [todo.txt](http://todotxt.com/). Pet project developed for two reasons:
 * practice Clojure
 * implement [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) in a functional language
 
@@ -31,6 +31,10 @@ http GET :3000/todos/1
 http PUT :3000/todos/1 task="maybe tomorrow"
 http DELETE :3000/todos/1
 ```
+
+## Configuration
+
+`todo.txt` file location can be configured as the environment variable `TODO_FILE` or Java system property `todo.file`.
 
 # Structure
 
